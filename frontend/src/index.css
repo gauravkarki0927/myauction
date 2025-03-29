@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+html{
+  scroll-behavior: smooth;
+}
+
+/* .custom-bg{
+  background: url('./pictures/bg.avif');
+  background-position: center;
+  background-size: cover;
+} */
+
+.slider-image1 {
+    background: #1b1b1ee6 url('./pictures/slider1.jpg');
+    background-blend-mode: overlay;
+    background-position: center;
+    background-size: cover;
+  }
+  
+  .slider-image2 {
+    background: #1b1b1ee6 url('./pictures/slider2.jpg');
+    background-blend-mode: overlay;
+    background-position: center;
+    background-size: cover;
+  }
+  
+  .slider-image3 {
+    background: #1b1b1ee6 url('./pictures/slider3.jpg');
+    background-blend-mode: overlay;
+    background-position: center;
+    background-size: cover;
+  }
+  
+  .slider-image4 {
+    background: #1b1b1ee6 url('./pictures/slider4.jpg');
+    background-blend-mode: overlay;
+    background-position: center;
+    background-size: cover;
+  }
+  
+  .slider-image5 {
+    background: #1b1b1ee6 url('./pictures/slider5.jpg');
+    background-blend-mode: overlay;
+    background-position: center;
+    background-size: cover;
+  }
+  
+  .slider-image6 {
+    background: #1b1b1ee6 url('./pictures/slider6.jpg');
+    background-blend-mode: overlay;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .effectHover{
+    position:relative;
+    border: 1px solid black;
+    border-radius: 100px;
+  }
+  .navanimate{
+    background: black;
+    height:100%;
+    width:0;
+    border-radius:100px;
+    position: absolute;
+    left:0;
+    top:0;
+    z-index: -1;
+    transition: 0.8s;
+}
+.effectHover:hover{
+  color:white;
+  transition: 0.8s ease-in-out;
+}
+.effectHover:hover .navanimate{
+    width:100%;
+    border:none;
+}
+
+.signup{
+  position:relative;
+  border: 1px solid black;
+  border-radius: 100px;
+}
+.signanimate{
+  background: black;
+  height:100%;
+  width:0;
+  border-radius:100px;
+  position: absolute;
+  right:0;
+  top:0;
+  z-index: -1;
+  transition: 0.8s;
+}
+.signup:hover{
+color:white;
+transition: 0.8s ease-in-out;
+}
+.signup:hover .signanimate{
+  width:100%;
+  border:none;
+}
+
+.ca{
+  background: #0c0c0cea;
+}
+
+
+@keyframes parallex {
+  from {
+    opacity: 0;
+    scale: 0.5;
+  }
+   to{
+    opacity: 1;
+    scale:1;
+   }
+}
+
+.animate {
+  animation: parallex linear;
+  animation-timeline: view();
+  animation-range: entry 0 cover 45%;
+}
