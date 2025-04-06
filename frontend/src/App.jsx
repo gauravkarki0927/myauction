@@ -16,6 +16,15 @@ import Myitems from './userUI/access/Myitems';
 import Givereviews from './userUI/access/Givereviews';
 import Payments from './userUI/access/Payments';
 import Profile from './userUI/access/Profile';
+import Innersearch from './userUI/access/Innersearch';
+import Allproducts from './userUI/Allproducts';
+import CheckoutPage from './userUI/access/Checkout';
+import Finalview from './userUI/access/Finalview';
+import Reviewbox from './userUI/access/Reviewbox';
+import Esewasuccess from './userUI/access/Esewasuccess';
+import Esewafailure from './userUI/access/Esewafailure';
+import Test from './userUI/access/Test';
+import Admindash from './adminUI/Admindash';
 
 function App() {
   return (
@@ -30,16 +39,25 @@ function App() {
         <Route path="/reset" element={<Resetpass />} /> */}
         <Route path="/product" element={<Productdetails />} />
         <Route path="/viewmore" element={<Viewmore />} />
+        <Route path="/allproducts" element={<Allproducts />} />
         <Route path="/aboutus" element={<AboutUS />} />
         <Route path="/contact" element={<Contactus />} />
         <Route path="/service" element={<Services />} />
         <Route path="/review" element={<Review />} />
         <Route path="/search" element={<Outersearch />} />
-        <Route path="/userdash" element={<Userdash />} />
-        <Route path="/products" element={<Myitems />} />
-        <Route path="/givereview" element={<Givereviews />} />
-        <Route path="/payments" element={<Payments />} />
-        <Route path="/userprofile" element={<Profile />} />
+        <Route path="/access/isearch" element={<Innersearch />} />
+        <Route path="/access/userdash" element={<Userdash />} />
+        <Route path="/access/myitems" element={<Myitems />} />
+        <Route path="/access/givereview" element={<Givereviews />} />
+        <Route path="/access/reviewbox" element={<Reviewbox />} />
+        <Route path="/access/payments" element={<Payments />} />
+        <Route path="/access/checkout" element={<CheckoutPage />} />
+        <Route path="/access/finalview" element={<Finalview />} />
+        <Route path="/access/success" element={<Esewasuccess />} />
+        <Route path="/access/failure" element={<Esewafailure />} />
+        <Route path="/access/userprofile" element={<Profile />} />
+        <Route path="/access/test" element={<Test />} />
+        <Route path="/admin" element={<Admindash />} />
       </Routes>
     </BrowserRouter>
   )

@@ -87,7 +87,7 @@ function Slider() {
               <div className="bg-transparent py-6">
                 <div className="bg-transparent flex w-full space-x-3">
                   <div className="bg-transparent">
-                    <a href="/viewmore" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
+                    <a href="/login" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -135,7 +135,7 @@ function Slider() {
               <div className="bg-transparent py-6">
                 <div className="bg-transparent flex w-full space-x-3">
                   <div className="bg-transparent">
-                    <a href="/viewmore" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
+                    <a href="/login" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -182,7 +182,7 @@ function Slider() {
               <div className="bg-transparent py-6">
                 <div className="bg-transparent flex w-full space-x-3">
                   <div className="bg-transparent">
-                    <a href="/viewmore" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
+                    <a href="/login" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -229,7 +229,7 @@ function Slider() {
               <div className="bg-transparent py-6">
                 <div className="bg-transparent flex w-full space-x-3">
                   <div className="bg-transparent">
-                    <a href="/viewmore" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
+                    <a href="/login" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -276,7 +276,7 @@ function Slider() {
               <div className="bg-transparent py-6">
                 <div className="bg-transparent flex w-full space-x-3">
                   <div className="bg-transparent">
-                    <a href="/viewmore" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
+                    <a href="/login" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -323,7 +323,7 @@ function Slider() {
               <div className="bg-transparent py-6">
                 <div className="bg-transparent flex w-full space-x-3">
                   <div className="bg-transparent">
-                    <a href="/viewmore" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
+                    <a href="/login" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -370,7 +370,7 @@ function Slider() {
               <div className="bg-transparent py-6">
                 <div className="bg-transparent flex w-full space-x-3">
                   <div className="bg-transparent">
-                    <a href="/viewmore" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
+                    <a href="/login" className="bg-amber-100 flex text-black xl:py-2 lg:py-2 py-1 xl:px-5 lg:px-5 px-2 rounded-full xl:font-semibold lg:font-semibold hover:text-white hover:bg-gray-800 dark:hover:bg-gray-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"

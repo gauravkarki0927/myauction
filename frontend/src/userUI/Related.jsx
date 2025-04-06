@@ -6,7 +6,7 @@ function Related() {
             <div className="flex flex-col gap-2 py-4">
                 <div className="flex justify-between items-center py-3 xl:px-14 lg:px-10 md:px-8 sm:px-6 px-4">
                     <h1 className="text-xl font-semibold">Related Products</h1>
-                    <a className="text-pink-900 text-[13px]" href="/viewmore">View more <i class="px-1 fa-solid fa-angle-right"></i></a>
+                    {/* <a className="text-pink-900 text-[13px]" href="/viewmore">View more <i class="px-1 fa-solid fa-angle-right"></i></a> */}
                 </div>
                 <div className="flex flex-wrap justify-left gap-3 h-auto w-full xl:px-14 lg:px-10 md:px-8 sm:px-6 px-2">
                     <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]">

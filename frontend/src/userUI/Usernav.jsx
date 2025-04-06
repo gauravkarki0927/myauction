@@ -23,7 +23,7 @@ function Usernav() {
                         <li className="hover:text-red-600"><a href="#about">About Us</a></li>
                         <li className="hover:text-red-600"><a href="#service">Service</a></li>
                         <li className="hover:text-red-600"><a href="#contact">Contact</a></li>
-                        <li className="hover:text-red-600"><a href="#review">Review</a></li>
+                        <li className="hover:text-red-600"><a href="#reviews">Review</a></li>
                     </ul>
                 </div>
                 <div className="xl:flex lg:flex hidden">
@@ -49,7 +49,7 @@ function Usernav() {
                             <li><a href="#about">About Us</a></li>
                             <li><a href="#service">Service</a></li>
                             <li><a href="#contact">Contact</a></li>
-                            <li><a href="#review">Review</a></li>
+                            <li><a href="#reviews">Review</a></li>
                             <li><a href="/login">Login</a></li>
                             <li><a href="/signup">Signup</a></li>
                         </ul>
@@ -72,22 +72,28 @@ function Usernav() {
                         Upcoming items
                     </button>
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Electronics
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Transports
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Communication
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
                         Antique
+                    </button>
+                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
+                        Artifact
                     </button>
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
                         Clothings
                     </button>
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
+                        Communication
+                    </button>
+                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
+                        Electronics
+                    </button>
+                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
                         Softwares
+                    </button>
+                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
+                        Sclupture
+                    </button>
+                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
+                        Transports
                     </button>
                 </div>
             </div>

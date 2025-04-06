@@ -4,11 +4,12 @@ html{
   scroll-behavior: smooth;
 }
 
-/* .custom-bg{
-  background: url('./pictures/bg.avif');
+.login-bg{
+  background: #1b1b1ee6 url('./pictures/login.jpg');
+  background-blend-mode: overlay;
   background-position: center;
   background-size: cover;
-} */
+}
 
 .slider-image1 {
     background: #1b1b1ee6 url('./pictures/slider1.jpg');
