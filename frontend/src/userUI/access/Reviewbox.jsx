@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
 
 const Reviewbox = ({ initialUsername, initialMessage, onSubmit }) => {
     const [review, setReview] = useState(initialMessage);
@@ -19,6 +21,31 @@ const Reviewbox = ({ initialUsername, initialMessage, onSubmit }) => {
             box.style.display = "none";
         }
     };
+
+    const navigate = useNavigate();
+    useEffect(() => {
+      const getUserData = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            navigate('/login');
+            return;
+          }
+  
+          const response = await axios.get("http://localhost:3000/access/reviewbox", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+          });
+          console.log(response.data);
+  
+        } catch (err) {
+          console.error(err);
+          navigate('/login');
+        }
+      };
+      getUserData();
+    }, []);
 
     return (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white p-6 rounded border border-gray-200 shadow-md" id="reviewBox">

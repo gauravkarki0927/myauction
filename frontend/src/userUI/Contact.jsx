@@ -120,14 +120,14 @@ function Contact() {
                                     <div className="mb-6">
                                         <div className="mx-0 mb-1 sm:mb-4">
                                             <div className="mx-0 mb-1 sm:mb-4">
-                                                <label for="name" className="pb-1 text-gray-800 text-xs uppercase tracking-wider"></label><input onChange={onInputChange} type="text" name="subject" autocomplete="given-name" placeholder="Your name" className="mb-2 w-full outline-none rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md text-gray-900 sm:mb-0" />
+                                                <label HtmlFor="name" className="pb-1 text-gray-800 text-xs uppercase tracking-wider"></label><input onChange={onInputChange} type="text" name="subject" autocomplete="given-name" placeholder="Your name" className="mb-2 w-full outline-none rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md text-gray-900 sm:mb-0" />
                                             </div>
                                             <div className="mx-0 mb-1 sm:mb-4">
-                                                <label for="email" className="pb-1 text-gray-800 text-xs uppercase tracking-wider"></label><input onChange={onInputChange} type="email" name="to" autocomplete="email" placeholder="Your email address" className="mb-2 w-full outline-none rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md text-gray-900 sm:mb-0" />
+                                                <label HtmlFor="email" className="pb-1 text-gray-800 text-xs uppercase tracking-wider"></label><input onChange={onInputChange} type="email" name="to" autocomplete="email" placeholder="Your email address" className="mb-2 w-full outline-none rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md text-gray-900 sm:mb-0" />
                                             </div>
                                         </div>
                                         <div className="mx-0 mb-1 sm:mb-4">
-                                            <label for="textarea" className="pb-1 text-gray-800 text-xs uppercase tracking-wider"></label><textarea onChange={onInputChange} id="textarea" name="message" cols="30" rows="5" placeholder="Write your message..." className="mb-2 w-full outline-none rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md text-gray-900 sm:mb-0"></textarea>
+                                            <label HtmlFor="textarea" className="pb-1 text-gray-800 text-xs uppercase tracking-wider"></label><textarea onChange={onInputChange} id="textarea" name="message" cols="30" rows="5" placeholder="Write your message..." className="mb-2 w-full outline-none rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md text-gray-900 sm:mb-0"></textarea>
                                         </div>
                                     </div>
                                     <div className="text-center">

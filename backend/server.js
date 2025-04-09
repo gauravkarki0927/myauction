@@ -1,18 +1,20 @@
 const express = require('express');
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const cors = require("cors");
 const bcrypt = require('bcrypt');
 const path = require('path');
 const multer = require('multer');
+const bodyParser = require('body-parser');
 
 const nodemailer = require('nodemailer');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false })); // For form data
+app.use(bodyParser.json());
 
-const buildPath = path.join(__dirname, '..', 'build');
-app.use(express.json());
-app.use(express.static(buildPath));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/productImage', express.static(path.join(__dirname, 'productImage')));
 
 const db = mysql.createConnection({
     host: "localhost",
@@ -33,8 +35,8 @@ app.post('/sendMail', (req, res) => {
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'myproject.gk01@gmail.com',
-            pass: 'mjcy okrc vidj amcj'
+            user: process.env.EMAIL_FOR_PROJECT,
+            pass: process.env.PASSWORD_FOR_ACCESS
         }
     });
 
@@ -93,8 +95,8 @@ app.post('/signup', upload.single('profileImage'), async (req, res) => {
     });
 });
 
-
 // login route to handle user login
+const jwt = require('jsonwebtoken');
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     const sql = "SELECT * FROM user_signup WHERE `user_email` = ? AND `access` = 'User'";
@@ -110,16 +112,46 @@ app.post('/login', (req, res) => {
         const user = data[0];
         const isMatch = await bcrypt.compare(password, user.user_pass);
         if (isMatch) {
-            return res.status(200).json({ message: "Login successful", user });
+            const token = jwt.sign({id: user.user_id}, process.env.JWT_KEY, {expiresIn: '3h'});
+            return res.status(201).json({token: token});
         } else {
             return res.status(401).json({ error: "Invalid email or password" });
         }
     });
 });
 
+function authMiddleware(req, res, next) {
+    try {
+      const authHeader = req.headers['authorization'];
+      if (!authHeader) {
+        return res.status(401).json({ message: 'Access Denied: No token provided' });
+      }
+  
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_KEY);
+  
+      req.user = decoded.id;
+      next();
+    } catch (err) {
+      return res.status(403).json({ message: 'Invalid Token' });
+    }
+  }
+  
+
+// Protected route
+app.get(['/access/isearch, /access/userdash','/access/myitems','/access/givereview','/access/reviewbox','/access/payments','/access/checkout','/access/finalview','/access/success','/access/failure','/access/userprofile'], authMiddleware, (req, res) => {
+    res.status(200).json({
+        message: 'Authorized access',
+        path: req.path,
+        userId: req.user,
+    });
+});
+
+  
+
 // route to fetch all users
 app.get('/users', (req, res) => {
-    const sql = "SELECT * FROM user_signup WHERE `access` ='User'";
+    const sql = "SELECT * FROM user_signup WHERE `access`='User'";
 
     db.query(sql, (err, results) => {
         if (err) {
@@ -127,6 +159,7 @@ app.get('/users', (req, res) => {
             return res.status(500).json({ error: 'Failed to fetch users' });
         }
         res.status(200).json(results);
+        
     });
 });
 
@@ -155,28 +188,144 @@ app.delete('/delete/:id', (req, res) => {
     });
 });
 
-// const products = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'uploads/');
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, Date.now() + path.extname(file.originalname));
-//     }
-// });
 
-// const poducts = multer({ storage: storage });
-// app.post('/additems', poducts.single('proImage'), async (req, res) => {
-//     const { proName, otherName, price, type, days, description } = req.body;
-//     const proPath = req.file ? req.file.filename : null;
+// Multer setup for handling file uploads
+const products = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'productImage/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
 
-//     const sql = "INSERT INTO products(`uid`,`productName`,`otherName`,`price`,`proImage`, `type`,`days`,`description`) VALUES(?)";
-//     const values = [proName, otherName, price, proPath, type, days, description];
+const productPath = multer({ storage: products });
 
-//     db.query(sql, [values], (err, data) => {
+// Route to handle form submission
+app.post('/additems', productPath.array('proImage', 4), async (req, res) => {
+    const { proName, otherName, price, type, days, description } = req.body;
+
+    const imagePaths = req.files ? req.files.map(file => file.filename) : [];
+
+  const sql = `INSERT INTO products (productName, otherName, price, proImage, type, days, description) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  db.query(sql, [proName, otherName, price, JSON.stringify(imagePaths), type, days, description], (err, result) => {
+    if (err) {
+      res.status(500).json({ message: 'Error inserting product data' });
+      return;
+    }
+    res.status(201).json({ message: 'Product added successfully', productId: result.insertId });
+  });
+});
+
+// route to approve product before display
+app.delete('/approvePro/:id', (req, res) => {
+    const proId = req.params.id;
+
+    if (!Number.isInteger(parseInt(userId))) {
+        return res.status(400).json({ error: 'Invalid product ID' });
+    }
+
+    const sql = 'UPDATE user_signup SET `approve`=1 WHERE User_id = ?';
+
+    db.query(sql, [proId], (err, result) => {
+        if (err) {
+            console.error('Error approving post:', err);
+            return res.status(500).json({ error: 'Failed to approve post' });
+        }
+
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: `The items has been approved` });
+        } else {
+            res.status(404).json({ message: `Approve failed` });
+        }
+    });
+});
+
+// route to fetch all products
+app.get('/allitems', (req, res) => {
+    const sql = "SELECT * FROM products";
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to fetch result' });
+        }
+        res.status(200).json(results);
+        
+    });
+});
+
+// search route to find single product by id
+app.post('/searchItems', (req, res) => {
+    const { searchItem } = req.body;
+
+    if (!searchItem) {
+        return res.status(400).json({ error: 'Missing search term' });
+    }
+
+    const sql = 'SELECT * FROM products WHERE CONCAT(productName, otherName, price, type) LIKE ?';
+
+    db.query(sql, [`%${searchItem}%`], (err, result) => {
+        if (err) {
+            console.error('Error finding items:', err);
+            return res.status(500).json({ error: 'Failed to fetch data' });
+        }
+
+        if (result.length > 0) {
+            res.status(200).json(result);
+        } else {
+            res.status(404).json({ message: 'Item not found' });
+        }
+    });
+});
+
+// search route to filter single product by option
+app.post('/filterItems', (req, res) => {
+    const { searchItem } = req.body;
+
+    if (!searchItem) {
+        return res.status(400).json({ error: 'Missing search term' });
+    }
+
+    let sql;
+    let values = [];
+
+    if (searchItem === 'allitems') {
+        sql = 'SELECT * FROM products';
+    } else if (searchItem === 'newitems') {
+        sql = 'SELECT * FROM products ORDER BY pid DESC';
+    } else if (searchItem === 'upcoming') {
+        sql = 'SELECT * FROM products WHERE listed = 0';
+    } else {
+        sql = 'SELECT * FROM products WHERE type LIKE ?';
+        values = [`%${searchItem}%`];
+    }
+
+    db.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Error finding items:', err);
+            return res.status(500).json({ error: 'Failed to fetch data' });
+        }
+
+        if (result.length > 0) {
+            res.status(200).json(result);
+        } else {
+            res.status(200).json([]);
+        }
+    });
+});
+
+// route to fetch user profile
+// app.get('/userPro:id', (req, res) => {
+//     const [uid] = req.body;
+//     const sql = "SELECT * FROM user_signup WHERE `access`='User' user_id=?";
+
+//     db.query(sql, [uid], (err, results) => {
 //         if (err) {
-//             return res.status(500).json({ err: 'Database error' });
+//             console.error('Error fetching user:', err);
+//             return res.status(500).json({ error: 'Failed to fetch user' });
 //         }
-//         return res.status(201).json(data);
+//         res.status(200).json(results);
+        
 //     });
 // });
 
@@ -204,6 +353,6 @@ app.delete('/delete/:id', (req, res) => {
 //     });
 // });
 
-app.listen(3000, () => {
+app.listen(process.env.PORT, () => {
     console.log('Server listening at port 3000');
 });

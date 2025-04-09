@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import Filter from './Filter';
 
 function Usernav() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -7,16 +10,49 @@ function Usernav() {
         setIsMenuOpen(!isMenuOpen);
     };
 
+    const [search, setSearch] = useState({
+        searchItem: ''
+    });
+
+    const handleChange = (e) => {
+        setSearch({ ...search, [e.target.name]: e.target.value });
+    };
+
+    const navigate = useNavigate();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post(
+                'http://localhost:3000/searchItems',
+                { searchItem: search.searchItem },
+                { headers: { 'Content-Type': 'application/json' } }
+            );
+    
+            if (response.status === 200) {
+                navigate('/search', { state: { searchItem: search.searchItem } });
+            } else {
+                alert('Error searching product: ' + response.statusText);
+            }
+        } catch (error) {
+            alert('Network error: ' + error.message);
+        }
+    };
+    
+    
+
     return (
         <>
             <div className="w-full flex justify-between items-center border-b border-gray-300 xl:px-16 lg:px-12 md:px-10 px-6 py-3 fixed top-0 left-0 bg-white z-1000">
                 <div>
                     <p className="font-semibold text-[24px] xl:text-[20px] md:text[16px]"> <a href="/"><span className="text-rose-700">My</span>Auction</a> </p>
                 </div>
-                <div className="flex text-[13px] gap-2 px-2 items-center py-[6px] border-none bg-gray-100 rounded-[50px] xl:w-[600px] lg:w-[400px] md:w-[500px] sm:w-[400px] w-[160px]">
-                    <i className="fa-solid fa-magnifying-glass text-gray-500"></i>
-                    <input className="outline-none text-gray-800 w-full" type="text" placeholder="Search your items here...." />
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="flex text-[13px] gap-2 px-2 items-center py-[6px] border-none bg-gray-100 rounded-[50px] xl:w-[600px] lg:w-[400px] md:w-[500px] sm:w-[400px] w-[160px]">
+                        <i className="fa-solid fa-magnifying-glass text-gray-500"></i>
+                        <input name="searchItem" className="outline-none text-gray-800 w-full" type="text" placeholder="Search your items here...." value={search.searchItem} onChange={handleChange} />
+                        <button type="submit" className="hidden"></button>
+                    </div>
+                </form>
                 <div className="hidden xl:flex lg:flex">
                     <ul className="flex gap-4 text-[13px] font-semibold">
                         <li className="hover:text-red-600"><a href="#product">Products</a></li>
@@ -56,47 +92,7 @@ function Usernav() {
                     </div>
                 </div>
             )}
-
-            <div className="flex flex-col gap-2 border-b border-gray-300 xl:px-16 lg:px-12 md:px-10 px-6 py-3 mt-16" id="home">
-                <div className="flex flex-wrap gap-4">
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        All items
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        New items
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Populars
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Upcoming items
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Antique
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Artifact
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Clothings
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Communication
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Electronics
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Softwares
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Sclupture
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded">
-                        Transports
-                    </button>
-                </div>
-            </div>
+            <Filter />
         </>
     );
 }

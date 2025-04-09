@@ -1,32 +1,94 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import Usernav from "./Usernav";
 import Related from "./Related";
 import Footer from "./Footer";
 
 function Productdetails() {
 
-    const [mainImageSrc, setMainImageSrc] = useState("https://images.unsplash.com/photo-1505740420928-5e560c06d30e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080");
+    const [product, setProduct] = useState({});
+    const [searchParams] = useSearchParams();
 
+    useEffect(() => {
+        const fetchProduct = async () => {
+            const productId = searchParams.get('pid');
+
+            try {
+                const response = await fetch(`http://localhost:3000/productDetails/${productId}`, {
+                    method: 'POST',
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setProduct(data);
+
+                    try {
+                        const parsedImages = JSON.parse(data.proImage);
+                        setImages(parsedImages);
+                        const initialImage = `http://localhost:3000/productImage/${parsedImages[0]}`;
+                        setMainImageSrc(initialImage);
+                    } catch (err) {
+                        console.error("Invalid JSON in proImage", err);
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching product:", err);
+                alert("Failed to fetch product details.");
+            }
+        };
+
+        fetchProduct();
+    }, [searchParams]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    const [mainImageSrc, setMainImageSrc] = useState(null);
+    const [images, setImages] = useState([]);
     const changeImage = (src) => {
         setMainImageSrc(src);
     };
 
-    const [time, setTime] = useState(new Date().toLocaleTimeString());
+    const [remainingTime, setRemainingTime] = useState("");
+    const postDate = new Date(product.submitted);
+    const durationInDays = product.days;
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setTime(new Date().toLocaleTimeString());
-        }, 1000);
+        const endDate = new Date(postDate);
+        endDate.setDate(endDate.getDate() + durationInDays);
+
+        const updateRemainingTime = () => {
+            const now = new Date();
+            const timeDiff = endDate - now;
+
+            if (timeDiff <= 0) {
+                setRemainingTime("Auction Ended");
+                return;
+            }
+
+            const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
+            const seconds = Math.floor((timeDiff / 1000) % 60);
+
+            setRemainingTime(
+                `${days}d:${hours}h:${minutes}m:${seconds}s`
+            );
+        };
+
+        updateRemainingTime();
+        const timer = setInterval(updateRemainingTime, 1000);
 
         return () => clearInterval(timer);
-    }, []);
+    }, [postDate, durationInDays]);
 
-    const handleShare = async (url) => {
+    const handleShare = async () => {
+        const url = window.location.href;
         if (navigator.share) {
             try {
-                await navigator.share({
-                    url,
-                });
+                await navigator.share({ url });
             } catch (error) {
                 console.error('Error sharing content:', error);
             }
@@ -34,6 +96,7 @@ function Productdetails() {
             alert('Share not supported on this browser. Please copy the URL manually.');
         }
     };
+
 
     const [biddingAmount, setBiddingAmount] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
@@ -47,7 +110,7 @@ function Productdetails() {
         else if (!/^\d+$/.test(value)) {
             setErrorMessage("Please enter a valid number.");
         }
-        else if (parseInt(value, 10) <= 1000) {
+        else if (parseInt(value, 10) <= product.price) {
             setErrorMessage("Please enter higher amount.");
         }
         else {
@@ -58,67 +121,61 @@ function Productdetails() {
     };
 
 
-
     return (
         <>
             <Usernav />
-            <div class="bg-white">
-                <div class="container mx-auto px-6 py-8">
-                    <div class="flex flex-wrap -mx-4">
+            <div className="bg-white">
+                <div className="container mx-auto px-6 py-8">
+                    <div className="flex flex-wrap -mx-4">
 
-                        <div class="w-full md:w-1/2 px-4 mb-8">
+                        <div className="w-full md:w-1/2 px-4 mb-8">
                             <img src={mainImageSrc} alt="Product"
-                                class="w-full h-auto rounded-lg shadow-md mb-4" id="mainImage" />
-                            <div class="flex gap-4 py-4 justify-center overflow-x-auto">
-                                <button onClick={() => changeImage("https://images.unsplash.com/photo-1505751171710-1f6d0ace5a85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxMnx8aGVhZHBob25lfGVufDB8MHx8fDE3MjEzMDM2OTB8MA&ixlib=rb-4.0.3&q=80&w=1080")}>
-                                    <img src="https://images.unsplash.com/photo-1505751171710-1f6d0ace5a85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxMnx8aGVhZHBob25lfGVufDB8MHx8fDE3MjEzMDM2OTB8MA&ixlib=rb-4.0.3&q=80&w=1080" alt="Thumbnail 1"
-                                        class="size-16 sm:size-20 object-cover rounded-md cursor-pointer opacity-60 hover:opacity-100 transition duration-300" />
-                                </button>
-                                <button onClick={() => changeImage("https://images.unsplash.com/photo-1484704849700-f032a568e944?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw0fHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080")}>
-                                    <img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw0fHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080" alt="Thumbnail 2"
-                                        class="size-16 sm:size-20 object-cover rounded-md cursor-pointer opacity-60 hover:opacity-100 transition duration-300"
-                                    />
-                                </button>
-                                <button onClick={() => changeImage("https://images.unsplash.com/photo-1496957961599-e35b69ef5d7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw4fHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080")}>
-                                    <img src="https://images.unsplash.com/photo-1496957961599-e35b69ef5d7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw4fHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080" alt="Thumbnail 3"
-                                        class="size-16 sm:size-20 object-cover rounded-md cursor-pointer opacity-60 hover:opacity-100 transition duration-300"
-                                    />
-                                </button>
-                                <button onClick={() => changeImage("https://images.unsplash.com/photo-1528148343865-51218c4a13e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwzfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080")}>
-                                    <img src="https://images.unsplash.com/photo-1528148343865-51218c4a13e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwzfHxoZWFkcGhvbmV8ZW58MHwwfHx8MTcyMTMwMzY5MHww&ixlib=rb-4.0.3&q=80&w=1080" alt="Thumbnail 4"
-                                        class="size-16 sm:size-20 object-cover rounded-md cursor-pointer opacity-60 hover:opacity-100 transition duration-300"
-                                    />
-                                </button>
+                                className="w-full h-auto rounded-lg shadow-md mb-4" id="mainImage" />
+                            <div className="flex gap-4 py-4 justify-center overflow-x-auto">
+                                {images.map((img, index) => (
+                                    <button key={index} onClick={() => changeImage(`http://localhost:3000/productImage/${img}`)}>
+                                        <img
+                                            src={`http://localhost:3000/productImage/${img}`}
+                                            alt={`Thumbnail ${index + 1}`}
+                                            className="w-20 h-20 object-cover rounded-md cursor-pointer opacity-60 hover:opacity-100 transition duration-300"
+                                        />
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
-                        <div class="w-full md:w-1/2 px-4">
-                            <h2 class="text-3xl font-bold mb-2">Premium Wireless Headphones</h2>
-                            <p class="text-gray-600 mb-4">SKU: WH1000XM4</p>
-                            <div class="mb-4">
-                                <span class="text-2xl font-bold mr-2">Rs.500/-</span>
+                        <div className="w-full md:w-1/2 px-4">
+                            <h2 className="text-3xl font-bold mb-2">{product.productName}</h2>
+                            <p className="text-gray-600 mb-4">{product.otherName}</p>
+                            <div className="mb-4">
+                                <span className="text-2xl font-bold mr-2">Rs.{product.price}/-</span>
                             </div>
-                            <p class="text-gray-700 mb-6">Experience premium sound quality and industry-leading noise cancellation
-                                with
-                                these wireless headphones. Perfect for music lovers and frequent travelers.</p>
+                            <p className="text-gray-700 mb-6">
+                                {product.description}
+                            </p>
 
-                            <div class="mb-6">
-                                <h3 class="text-lg font-semibold mb-2">Highest Bid:</h3>
-                                <div class="flex space-x-2">
-                                    <input disabled value="1000"
-                                        class="w-20 border border-gray-300 px-4 py-2 rounded shadow-md" />
-                                    <div className="flex items-center space-x-2 border border-gray-300 px-4 py-2 rounded shadow-md">
-                                        <p>Time: </p>
-                                        <input disabled value={time}
-                                            class="w-20" />
+                            <div className="flex flex-wrap md:flex-nowrap gap-4">
+                                <div className="mb-6 flex flex-col justify-center items-center">
+                                    <h3 className="text-md font-semibold mb-2">Highest Bid</h3>
+                                    <div className="flex space-x-2">
+                                        <input disabled value={product.bidding_amount ? product.bidding_amount : `None`}
+                                            className="w-20 border border-gray-300 px-4 py-2 rounded shadow-md" />
                                     </div>
-
+                                </div>
+                                <div className="mb-6 flex flex-col justify-center items-center">
+                                    <h3 className="text-md font-semibold mb-2">Remaining Time</h3>
+                                    <div className="flex space-x-2">
+                                        <div className="flex items-center space-x-2 border border-gray-300 px-2 py-2 rounded shadow-md">
+                                            <input disabled value={remainingTime}
+                                                className="w-28" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <form action="">
-                                <div class="mb-6">
-                                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Bid your amount:</label>
+                            <form>
+                                <div className="mb-6">
+                                    <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">Bid your amount:</label>
 
                                     <input
                                         type="text"
@@ -139,12 +196,12 @@ function Productdetails() {
 
                                 </div>
 
-                                <div class="flex space-x-4 mb-6">
+                                <div className="flex space-x-4 mb-6">
                                     <button type="submit"
-                                        class="bg-green-600 flex gap-2 items-center text-white px-6 py-2 rounded hover:bg-green-700 outline-none cursor-pointer">
+                                        className="bg-[#0e0e0f] flex gap-2 items-center text-white px-6 py-2 rounded outline-none cursor-pointer">
                                         Submit
                                     </button>
-                                    <a href="#" onClick={handleShare} url="http://localhost:5173/product" className="bg-gray-200 flex gap-2 items-center  text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300 outline-none">Share
+                                    <a onClick={handleShare} className="bg-gray-200 flex gap-2 items-center cursor-pointer text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300 outline-none">Share
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 m-1 bg-transparent">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
                                         </svg>
@@ -152,8 +209,8 @@ function Productdetails() {
                                 </div>
                             </form>
                             <div>
-                                <h3 class="text-lg font-semibold mb-2">Key Features:</h3>
-                                <ul class="list-disc list-inside text-gray-700">
+                                <h3 className="text-lg font-semibold mb-2">Key Features:</h3>
+                                <ul className="list-disc list-inside text-gray-700">
                                     <li>Industry-leading noise cancellation</li>
                                     <li>30-hour battery life</li>
                                     <li>Touch sensor controls</li>

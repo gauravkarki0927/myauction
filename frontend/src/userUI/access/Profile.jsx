@@ -1,4 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
 import Footer from '../Footer';
 import user from '../../pictures/user.jpg';
@@ -22,6 +24,31 @@ function Profile() {
   const handleUploadClick = () => {
     inputFileRef.current.click();
   };
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const response = await axios.get("http://localhost:3000/access/userprofile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
+        console.log(response.data);
+
+      } catch (err) {
+        console.error(err);
+        navigate('/login');
+      }
+    };
+    getUserData();
+  }, []);
 
 
   return (

@@ -27,7 +27,6 @@ function Footer() {
                             <div className="col-span-2 lg:col-span-3 lg:flex lg:items-end">
                                 <form className="w-full">
                                     <label htmlFor="UserEmail" className="sr-only"> Email </label>
-
                                     <div
                                         className="border border-gray-100 p-2 sm:flex sm:items-center sm:gap-4"
                                     >
@@ -38,10 +37,10 @@ function Footer() {
                                             className="w-full border-none outline-none sm:text-sm"
                                         />
 
-                                        <button
-                                            className="mt-1 w-full bg-[#0c0c0cea] px-6 py-3 text-sm font-bold tracking-wide text-white rounded cursor-pointer uppercase transition-none sm:mt-0 sm:w-auto sm:shrink-0"
+                                        <button type="none"
+                                            className="mt-1 w-full px-6 py-3 text-sm font-bold tracking-wide bg-gray-200 shadow-md rounded cursor-pointer uppercase sm:mt-0 sm:w-auto sm:shrink-0"
                                         >
-                                            Suscribe
+                                            <a href="/login">Suscribe</a>
                                         </button>
                                     </div>
                                 </form>

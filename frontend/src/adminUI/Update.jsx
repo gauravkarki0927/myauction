@@ -7,14 +7,13 @@ function Update() {
             <table className="w-full table-auto">
                 <thead>
                     <tr className="bg-gray-200 text-gray-800 uppercase text-sm leading-normal">
-                        <th className="py-3 px-6 text-left">ID</th>
-                        <th className="py-3 px-6 text-left">Profile</th>
-                        <th className="py-3 px-6 text-left">Name</th>
-                        <th className="py-3 px-6 text-left">Email</th>
-                        <th className="py-3 px-6 text-left">Contact</th>
-                        <th className="py-3 px-6 text-left">Street</th>
-                        <th className="py-3 px-6 text-left">District</th>
-                        <th className="py-3 px-6 text-left">State</th>
+                        <th className="py-3 px-6 text-left">ProductID</th>
+                        <th className="py-3 px-6 text-left">UserID</th>
+                        <th className="py-3 px-6 text-left">Image</th>
+                        <th className="py-3 px-6 text-left">Product Name</th>
+                        <th className="py-3 px-6 text-left">Other Name</th>
+                        <th className="py-3 px-6 text-left">Price</th>
+                        <th className="py-3 px-6 text-left">Auction Days</th>
                         <th className="py-3 px-6 text-center">Actions</th>
                     </tr>
                 </thead>

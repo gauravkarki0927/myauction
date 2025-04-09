@@ -1,9 +1,37 @@
-import React from 'react'
+import React, { useEffect } from 'react';
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation'
 import Footer from '../Footer'
 import camera from '../../pictures/camera.jpg';
 
 function Payments() {
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const response = await axios.get("http://localhost:3000/access/payments", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
+        console.log(response.data);
+
+      } catch (err) {
+        console.error(err);
+        navigate('/login');
+      }
+    };
+    getUserData();
+  }, []);
+
   return (
     <>
       <Navigation />

@@ -31,24 +31,26 @@ function Login() {
 
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        axios.post('http://localhost:3000/login', values)
-            .then(res => {
-                if (res.data.message === "Login successful") {
-                    navigate('/access/userdash');
-                } else if (res.data.error === "Invalid email or password") {
-                    alert("Invalid email or password");
-                } else if (res.data.error === "Database error") {
-                    alert("Database error. Please try again later.");
-                } else {
-                    alert('Login failed. Please try again.'); // Default error
-                }
-            })
-            .catch(err => {
+        try {
+            const response = await axios.post('http://localhost:3000/login', values);
+    
+            if (response.status === 201) {
+                localStorage.setItem('token', response.data.token);
+                navigate('/access/userdash');
+            } else {
+                alert(response.data.error || 'Login failed. Please try again.');
+            }
+        } catch (err) {
+            if (err.response && err.response.data?.error) {
+                alert(err.response.data.error);
+            } else {
                 alert('Login failed. Please try again.');
-            });
+            }
+        }
     };
+    
 
     return (
         <div className="min-h-screen">

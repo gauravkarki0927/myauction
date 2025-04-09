@@ -82,32 +82,32 @@ function Users() {
                     </thead>
                     <tbody className="text-gray-700 text-sm">
                         {users.map(user => (
-                              <tr className="border-b border-gray-200 hover:bg-gray-100" key={user.id}>
-                              <td className="py-3 px-6 text-left">{user.user_id}</td>
-                              <td className="py-3 px-6 text-left">
-                                  <img className="h-12" src={img1} alt="" />
-                              </td>
-                              <td className="py-3 px-6 text-left">{user.user_name}</td>
-                              <td className="py-3 px-6 text-left">{user.user_email}</td>
-                              <td className="py-3 px-6 text-left">{user.user_phone}</td>
-                              <td className="py-3 px-6 text-left">{user.user_street}</td>
-                              <td className="py-3 px-6 text-left">{user.user_district}</td>
-                              <td className="py-3 px-6 text-left">{user.user_state}</td>
-                              <td className="py-3 px-6 text-center">
-                                  <div className="flex item-center justify-center">
-                                      <button className="w-4 mr-2 transform hover:text-blue-500 hover:scale-110" onClick={() => handleButtonClick('edit')}>
-                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                          </svg>
-                                      </button>
-                                      <button className="w-4 mr-2 transform hover:text-red-500 hover:scale-110" onClick={() => handleDeleteClick(user.user_id)}>
-                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                          </svg>
-                                      </button>
-                                  </div>
-                              </td>
-                          </tr>
+                            <tr className="border-b border-gray-200 hover:bg-gray-100" key={user.user_id}>
+                                <td className="py-3 px-6 text-left">{user.user_id}</td>
+                                <td className="py-3 px-6 text-left">
+                                    <img className="h-12" src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : profilePicSrc}alt="" />
+                                </td>
+                                <td className="py-3 px-6 text-left">{user.user_name}</td>
+                                <td className="py-3 px-6 text-left">{user.user_email}</td>
+                                <td className="py-3 px-6 text-left">{user.user_phone}</td>
+                                <td className="py-3 px-6 text-left">{user.user_street}</td>
+                                <td className="py-3 px-6 text-left">{user.user_district}</td>
+                                <td className="py-3 px-6 text-left">{user.user_state}</td>
+                                <td className="py-3 px-6 text-center">
+                                    <div className="flex item-center justify-center">
+                                        <button className="w-4 mr-2 transform hover:text-blue-500 hover:scale-110" onClick={() => handleButtonClick('edit')}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                        <button className="w-4 mr-2 transform hover:text-red-500 hover:scale-110" onClick={() => handleDeleteClick(user.user_id)}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                         ))}
                     </tbody>
                 </table>
@@ -117,13 +117,14 @@ function Users() {
             >
                 <div className="flex flex-col md:flex-row">
                     <main className="flex-1">
-                        <form className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2">
+                    {users.map(user => (
+                        <form className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2" key={user.user_id}>
                             <div className="flex flex-wrap justify-around w-full">
                                 <div className="w-full md:w-1/4 mb-6 md:mb-0">
                                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
                                     <div className="flex flex-col items-center px-4">
                                         <div className="w-36 h-42 rounded overflow-hidden mb-4">
-                                            <img src={profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
+                                            <img src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
                                         </div>
 
                                         <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">
@@ -151,8 +152,8 @@ function Users() {
                                                 name="email"
                                                 type="email"
                                                 placeholder="Your login email"
-                                                value="jane.doe@email.com"
-                                                className="w-full border-gray-300 placeholder:text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
+                                                value={user.user_email}
+                                                className="w-full border-gray-300 text-[14px] placeholder:text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                                             />
                                         </div>
                                         <div>
@@ -181,7 +182,7 @@ function Users() {
                                                     name="user"
                                                     type="text"
                                                     className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                                                    value="jane.doe"
+                                                    value={user.user_name}
                                                 />
                                             </div>
                                             <div>
@@ -190,7 +191,7 @@ function Users() {
                                                     name="state"
                                                     type="text"
                                                     className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                                                    value="Jane"
+                                                    value={user.user_state}
                                                 />
                                             </div>
                                             <div>
@@ -199,7 +200,7 @@ function Users() {
                                                     name="district"
                                                     type="text"
                                                     className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                                                    value="Doe"
+                                                    value={user.user_district}
                                                 />
                                             </div>
                                             <div>
@@ -208,7 +209,7 @@ function Users() {
                                                     name="street"
                                                     type="text"
                                                     className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                                                    value="Admin"
+                                                    value={user.user_street}
                                                 />
                                             </div>
                                         </div>
@@ -269,6 +270,7 @@ function Users() {
                                 </button>
                             </div>
                         </form>
+                    ))}
                     </main>
                 </div>
             </div>
