@@ -68,7 +68,7 @@ function Outersearch() {
                 {product.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
                         {product.map(data => (
-                            <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
+                            <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]" key={data.product_id}>
                                 <div className="relative">
                                     <div className="cursor-pointer">
                                         {JSON.parse(data.proImage)[0] && (
@@ -76,7 +76,7 @@ function Outersearch() {
                                                 className="w-full"
                                                 src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
                                                 alt="Product Image"
-                                                onClick={() => productDetails(data.pid)}
+                                                onClick={() => productDetails(data.product_id)}
                                             />
                                         )}
                                         <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
@@ -114,7 +114,7 @@ function Outersearch() {
                                     })()}
                                     <div className="flex items-center justify-between">
                                         <span className="font-bold text-lg">Rs.{data.price}</span>
-                                        <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer" onClick={() => productDetails(data.pid)}>
+                                        <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer" onClick={() => productDetails(data.product_id)}>
                                             Bid Now
                                         </button>
                                     </div>
@@ -125,7 +125,7 @@ function Outersearch() {
                 ) : selectedFilter.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
                         {selectedFilter.map(data => (
-                            <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
+                            <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]" key={data.product_id}>
                                 <div className="relative">
                                     <div className="cursor-pointer">
                                         {JSON.parse(data.proImage)[0] && (
@@ -133,7 +133,7 @@ function Outersearch() {
                                                 className="w-full"
                                                 src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
                                                 alt="Product Image"
-                                                onClick={() => productDetails(data.pid)}
+                                                onClick={() => productDetails(data.product_id)}
                                             />
                                         )}
                                         <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
@@ -171,7 +171,7 @@ function Outersearch() {
                                     })()}
                                     <div className="flex items-center justify-between">
                                         <span className="font-bold text-lg">Rs.{data.price}</span>
-                                        <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer" onClick={() => productDetails(data.pid)}>
+                                        <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer" onClick={() => productDetails(data.product_id)}>
                                             Bid Now
                                         </button>
                                     </div>

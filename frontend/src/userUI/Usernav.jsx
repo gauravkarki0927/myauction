@@ -27,18 +27,21 @@ function Usernav() {
                 { searchItem: search.searchItem },
                 { headers: { 'Content-Type': 'application/json' } }
             );
-    
+
             if (response.status === 200) {
-                navigate('/search', { state: { searchItem: search.searchItem } });
+                navigate('/search', {
+                    state: {
+                        searchItem: search.searchItem,
+                        results: response.data
+                    }
+                });
             } else {
-                alert('Error searching product: ' + response.statusText);
+                alert('Unexpected response status: ' + response.status);
             }
         } catch (error) {
             alert('Network error: ' + error.message);
         }
     };
-    
-    
 
     return (
         <>

@@ -25,6 +25,8 @@ import Esewasuccess from './userUI/access/Esewasuccess';
 import Esewafailure from './userUI/access/Esewafailure';
 import Test from './userUI/access/Test';
 import Admindash from './adminUI/Admindash';
+import Innerprodetails from './userUI/access/Innerprodetails';
+import Ifilter from './userUI/access/Ifilter';
 
 function App() {
   return (
@@ -46,7 +48,9 @@ function App() {
         <Route path="/review" element={<Review />} />
         <Route path="/search" element={<Outersearch />} />
         <Route path="/access/isearch" element={<Innersearch />} />
+        <Route path="/access/innerproduct" element={<Innerprodetails />} />
         <Route path="/access/userdash" element={<Userdash />} />
+        <Route path="/access/ifilter" element={<Ifilter />} />
         <Route path="/access/myitems" element={<Myitems />} />
         <Route path="/access/givereview" element={<Givereviews />} />
         <Route path="/access/reviewbox" element={<Reviewbox />} />

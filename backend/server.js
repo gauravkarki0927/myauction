@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const app = express();
 app.use(cors());
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false })); // For form data
 app.use(bodyParser.json());
@@ -35,8 +36,8 @@ app.post('/sendMail', (req, res) => {
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: process.env.EMAIL_FOR_PROJECT,
-            pass: process.env.PASSWORD_FOR_ACCESS
+            user: 'myproject.gk01@gmail.com',
+            pass: 'mjcy okrc vidj amcj'
         }
     });
 
@@ -99,7 +100,7 @@ app.post('/signup', upload.single('profileImage'), async (req, res) => {
 const jwt = require('jsonwebtoken');
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    const sql = "SELECT * FROM user_signup WHERE `user_email` = ? AND `access` = 'User'";
+    const sql = "SELECT * FROM user_signup WHERE `user_email` = ?";
 
     db.query(sql, [email], async (err, data) => {
         if (err) {
@@ -112,8 +113,8 @@ app.post('/login', (req, res) => {
         const user = data[0];
         const isMatch = await bcrypt.compare(password, user.user_pass);
         if (isMatch) {
-            const token = jwt.sign({id: user.user_id}, process.env.JWT_KEY, {expiresIn: '3h'});
-            return res.status(201).json({token: token});
+            const token = jwt.sign({ id: user.user_id }, process.env.JWT_KEY, { expiresIn: '3h' });
+            return res.status(201).json({ token: token, role: user.access });
         } else {
             return res.status(401).json({ error: "Invalid email or password" });
         }
@@ -122,24 +123,38 @@ app.post('/login', (req, res) => {
 
 function authMiddleware(req, res, next) {
     try {
-      const authHeader = req.headers['authorization'];
-      if (!authHeader) {
-        return res.status(401).json({ message: 'Access Denied: No token provided' });
-      }
-  
-      const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_KEY);
-  
-      req.user = decoded.id;
-      next();
+        const authHeader = req.headers['authorization'];
+        if (!authHeader) {
+            return res.status(401).json({ message: 'Access Denied: No token provided' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_KEY);
+
+        req.user = decoded.id;
+        next();
     } catch (err) {
-      return res.status(403).json({ message: 'Invalid Token' });
+        return res.status(403).json({ message: 'Invalid Token' });
     }
-  }
-  
+}
+
 
 // Protected route
-app.get(['/access/isearch, /access/userdash','/access/myitems','/access/givereview','/access/reviewbox','/access/payments','/access/checkout','/access/finalview','/access/success','/access/failure','/access/userprofile'], authMiddleware, (req, res) => {
+app.get([
+    '/admin',
+    '/access/isearch',
+    '/access/innerproduct',
+    '/access/userdash',
+    '/access/myitems',
+    '/access/givereview',
+    '/access/reviewbox',
+    '/access/payments',
+    '/access/checkout',
+    '/access/finalview',
+    '/access/success',
+    '/access/failure',
+    '/access/userprofile'
+], authMiddleware, (req, res) => {
     res.status(200).json({
         message: 'Authorized access',
         path: req.path,
@@ -147,11 +162,11 @@ app.get(['/access/isearch, /access/userdash','/access/myitems','/access/giverevi
     });
 });
 
-  
+
 
 // route to fetch all users
 app.get('/users', (req, res) => {
-    const sql = "SELECT * FROM user_signup WHERE `access`='User'";
+    const sql = "SELECT * FROM user_signup WHERE `access`='user'";
 
     db.query(sql, (err, results) => {
         if (err) {
@@ -159,9 +174,32 @@ app.get('/users', (req, res) => {
             return res.status(500).json({ error: 'Failed to fetch users' });
         }
         res.status(200).json(results);
-        
+
     });
 });
+
+app.post('/userProfile', (req, res) => {
+    const userId = parseInt(req.body.userId);
+
+    if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const sql = "SELECT * FROM user_signup WHERE `user_id`=?";
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching users:', err);
+            return res.status(500).json({ error: 'Failed to fetch users' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.status(200).json(results);
+    });
+});
+
 
 
 // delete route to detete user
@@ -203,18 +241,21 @@ const productPath = multer({ storage: products });
 
 // Route to handle form submission
 app.post('/additems', productPath.array('proImage', 4), async (req, res) => {
-    const { proName, otherName, price, type, days, description } = req.body;
+    const { userId, proName, otherName, price, type, days, description, keypoints } = req.body;
 
     const imagePaths = req.files ? req.files.map(file => file.filename) : [];
 
-  const sql = `INSERT INTO products (productName, otherName, price, proImage, type, days, description) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-  db.query(sql, [proName, otherName, price, JSON.stringify(imagePaths), type, days, description], (err, result) => {
-    if (err) {
-      res.status(500).json({ message: 'Error inserting product data' });
-      return;
-    }
-    res.status(201).json({ message: 'Product added successfully', productId: result.insertId });
-  });
+    const sql = `INSERT INTO add_products (uid, productName, otherName, price, proImage, type, days, description, keyPoints) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const values = [userId, proName, otherName, price, JSON.stringify(imagePaths), type, days, description, keypoints];
+
+    db.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Insert error:', err);
+            return res.status(500).json({ message: 'Error inserting product data' });
+        }
+
+        res.status(201).json({ message: 'Product added successfully', productId: result.insertId });
+    });
 });
 
 // route to approve product before display
@@ -243,14 +284,38 @@ app.delete('/approvePro/:id', (req, res) => {
 
 // route to fetch all products
 app.get('/allitems', (req, res) => {
-    const sql = "SELECT * FROM products";
+    const sql = "SELECT * FROM add_products";
 
     db.query(sql, (err, results) => {
         if (err) {
             return res.status(500).json({ error: 'Failed to fetch result' });
         }
         res.status(200).json(results);
-        
+
+    });
+});
+
+// route to get product details
+app.post('/productDetails/:id', (req, res) => {
+    const productId = req.params.id;
+
+    if (!Number.isInteger(parseInt(productId))) {
+        return res.status(400).json({ error: 'Invalid product ID' });
+    }
+
+    const sql = 'SELECT * FROM add_products WHERE product_id = ?';
+
+    db.query(sql, [productId], (err, result) => {
+        if (err) {
+            console.error('Error fetching product:', err);
+            return res.status(500).json({ error: 'Failed to fetch product' });
+        }
+
+        if (result.length > 0) {
+            res.status(200).json(result);
+        } else {
+            res.status(404).json({ message: `Product not found` });
+        }
     });
 });
 
@@ -262,19 +327,19 @@ app.post('/searchItems', (req, res) => {
         return res.status(400).json({ error: 'Missing search term' });
     }
 
-    const sql = 'SELECT * FROM products WHERE CONCAT(productName, otherName, price, type) LIKE ?';
+    const sql = 'SELECT * FROM add_products WHERE CONCAT(productName, otherName, price, type) LIKE ?';
 
     db.query(sql, [`%${searchItem}%`], (err, result) => {
         if (err) {
             console.error('Error finding items:', err);
             return res.status(500).json({ error: 'Failed to fetch data' });
         }
-
         if (result.length > 0) {
             res.status(200).json(result);
         } else {
-            res.status(404).json({ message: 'Item not found' });
+            res.status(200).json([]);
         }
+        
     });
 });
 
@@ -290,13 +355,13 @@ app.post('/filterItems', (req, res) => {
     let values = [];
 
     if (searchItem === 'allitems') {
-        sql = 'SELECT * FROM products';
+        sql = 'SELECT * FROM add_products';
     } else if (searchItem === 'newitems') {
-        sql = 'SELECT * FROM products ORDER BY pid DESC';
+        sql = 'SELECT * FROM add_products ORDER BY product_id DESC';
     } else if (searchItem === 'upcoming') {
-        sql = 'SELECT * FROM products WHERE listed = 0';
+        sql = 'SELECT * FROM add_products WHERE listed = 0';
     } else {
-        sql = 'SELECT * FROM products WHERE type LIKE ?';
+        sql = 'SELECT * FROM add_products WHERE type LIKE ?';
         values = [`%${searchItem}%`];
     }
 
@@ -314,6 +379,55 @@ app.post('/filterItems', (req, res) => {
     });
 });
 
+// route to update the user biddings
+app.post('/submitBid', async (req, res) => {
+    const { productId, userId, amount } = req.body;
+
+    const sql = "INSERT INTO user_biddings(pid, uid, amount) VALUES (?,?,?)";
+    const values = [productId, userId, amount];
+
+    db.query(sql, values, (err, results) => {
+        if (err) {
+            console.error('Error inserting biddings:', err);
+            return res.status(500).json({ error: 'Failed to insert bids' });
+        }
+        res.status(200).json({ message: 'Bidding successful' });
+
+    });
+});
+
+// route to get highest biddings
+app.get('/highestBid/:pid', async (req, res) => {
+    const productId = req.params.pid;
+
+    const sql = `
+        SELECT amount AS highBid, uid AS user
+        FROM user_biddings
+        WHERE pid = ?
+          AND amount = (
+              SELECT MAX(amount)
+              FROM user_biddings
+              WHERE pid = ?
+          )
+        LIMIT 1
+    `;
+
+    db.query(sql, [productId, productId], (err, results) => {
+        if (err) {
+            console.error('Error fetching value:', err);
+            return res.status(500).json({ error: 'Failed to fetch value' });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({ highBid: null, user: null });
+        }
+
+        res.status(200).json(results[0]);
+    });
+});
+
+
+
 // route to fetch user profile
 // app.get('/userPro:id', (req, res) => {
 //     const [uid] = req.body;
@@ -325,7 +439,7 @@ app.post('/filterItems', (req, res) => {
 //             return res.status(500).json({ error: 'Failed to fetch user' });
 //         }
 //         res.status(200).json(results);
-        
+
 //     });
 // });
 

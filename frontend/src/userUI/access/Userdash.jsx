@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation'
-import Filter from '../Filter'
 import Footer from '../Footer'
 import Allproducts from '../Allproducts'
 import axios from 'axios'
+import Ifilter from './Ifilter';
 
 function Userdash() {
-  
+
+  const [user_id, setUser_id] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
     const getUserData = async () => {
@@ -23,7 +24,7 @@ function Userdash() {
             Authorization: `Bearer ${token}`,
           }
         });
-        console.log(response.data);
+        setUser_id(response.data.userId);
 
       } catch (err) {
         console.error(err);
@@ -36,8 +37,8 @@ function Userdash() {
   return (
     <>
       <Navigation />
-      <Filter />
-      <Allproducts />
+      <Ifilter />
+      <Allproducts user_id={user_id} />
       <Footer />
     </>
   )

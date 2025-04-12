@@ -38,10 +38,14 @@ function Login() {
     
             if (response.status === 201) {
                 localStorage.setItem('token', response.data.token);
-                navigate('/access/userdash');
+                if (response.data.role === "admin") {
+                    navigate('/admin');
+                } else {
+                    navigate('/access/userdash');
+                }
             } else {
                 alert(response.data.error || 'Login failed. Please try again.');
-            }
+            }            
         } catch (err) {
             if (err.response && err.response.data?.error) {
                 alert(err.response.data.error);
@@ -60,7 +64,7 @@ function Login() {
                         <div className="bg-white rounded-2xl lg:shadow-xl p-8">
                             <div className="text-center mb-8">
                                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full">
-                                    <img src={logo} alt="" srcset="" />
+                                    <img src={logo} alt="" srcSet="" />
                                 </div>
                                 <p className="text-center font-semibold text-[24px] xl:text-[32px] md:text[28px]">
                                     <a href="/">

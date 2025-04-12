@@ -1,10 +1,39 @@
 import React, { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 function Navigation() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
+    };
+
+    const [search, setSearch] = useState({
+        searchItem: ''
+    });
+
+    const handleChange = (e) => {
+        setSearch({ ...search, [e.target.name]: e.target.value });
+    };
+
+    const navigate = useNavigate();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post(
+                'http://localhost:3000/searchItems',
+                { searchItem: search.searchItem },
+                { headers: { 'Content-Type': 'application/json' } }
+            );
+
+            if (response.status === 200) {
+                navigate('/isearch', { state: { searchItem: search.searchItem } });
+            } else {
+                alert('Error searching product: ' + response.statusText);
+            }
+        } catch (error) {
+            alert('Network error: ' + error.message);
+        }
     };
 
     return (
@@ -13,10 +42,13 @@ function Navigation() {
                 <div>
                     <p className="font-semibold text-[24px] xl:text-[20px] md:text[16px]"> <a className="outline-none" href="/"><span className="text-rose-700">My</span>Auction</a> </p>
                 </div>
-                <div className="flex text-[13px] gap-2 px-2 items-center py-[6px] border-none bg-gray-100 rounded-[50px] xl:w-[600px] lg:w-[400px] md:w-[500px] sm:w-[400px] w-[160px]">
-                    <i className="fa-solid fa-magnifying-glass text-gray-500"></i>
-                    <input className="outline-none text-gray-800 w-full" type="text" placeholder="Search your items here...." />
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="flex text-[13px] gap-2 px-2 items-center py-[6px] border-none bg-gray-100 rounded-[50px] xl:w-[600px] lg:w-[400px] md:w-[500px] sm:w-[400px] w-[160px]">
+                        <i className="fa-solid fa-magnifying-glass text-gray-500"></i>
+                        <input name="searchItem" className="outline-none text-gray-800 w-full" type="text" placeholder="Search your items here...." value={search.searchItem} onChange={handleChange} />
+                        <button type="submit" className="hidden"></button>
+                    </div>
+                </form>
                 <div className="hidden xl:flex lg:flex">
                     <ul className="flex gap-4 text-[13px] font-semibold">
                         <li className="hover:text-red-600"><a className="flex flex-wrap md:flex-nowrap items-center" href="/access/userdash"><i className="fa-solid fa-house mx-1"></i>Home</a></li>

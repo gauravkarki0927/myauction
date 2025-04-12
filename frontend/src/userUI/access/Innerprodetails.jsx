@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from 'react-router-dom';
+import Navigation from "./Navigation";
+import Footer from "../Footer";
+import Related from "../Related";
+import Filter from "../Filter";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
-import Related from "./Related";
-import Footer from "./Footer";
-import Navigation from "./Navigation";
 
-function Productdetails() {
+function Innerprodetails() {
 
     const [product, setProduct] = useState({});
+    const [images, setImages] = useState([]);
     const [searchParams] = useSearchParams();
-    const [user_id, setUser_id] = useState([]);
+    const productId = searchParams.get('pid');
 
     useEffect(() => {
         const fetchProduct = async () => {
-            const productId = searchParams.get('pid');
 
             try {
                 const response = await fetch(`http://localhost:3000/productDetails/${productId}`, {
@@ -23,11 +24,14 @@ function Productdetails() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    setProduct(data);
+
+                    const productData = data[0];
+                    setProduct(productData);
 
                     try {
-                        const parsedImages = JSON.parse(data.proImage);
+                        const parsedImages = JSON.parse(productData.proImage);
                         setImages(parsedImages);
+
                         const initialImage = `http://localhost:3000/productImage/${parsedImages[0]}`;
                         setMainImageSrc(initialImage);
                     } catch (err) {
@@ -43,23 +47,24 @@ function Productdetails() {
         fetchProduct();
     }, [searchParams]);
 
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
     const [mainImageSrc, setMainImageSrc] = useState(null);
-    const [images, setImages] = useState([]);
     const changeImage = (src) => {
         setMainImageSrc(src);
     };
 
     const [remainingTime, setRemainingTime] = useState("");
-    const postDate = new Date(product.submitted);
-    const durationInDays = product.days;
 
     useEffect(() => {
+        if (!product.submitted || !product.days) return;
+
+        const postDate = new Date(product.submitted);
         const endDate = new Date(postDate);
-        endDate.setDate(endDate.getDate() + durationInDays);
+        endDate.setDate(endDate.getDate() + product.days);
 
         const updateRemainingTime = () => {
             const now = new Date();
@@ -84,7 +89,7 @@ function Productdetails() {
         const timer = setInterval(updateRemainingTime, 1000);
 
         return () => clearInterval(timer);
-    }, [postDate, durationInDays]);
+    }, [product.submitted, product.days]);
 
     const handleShare = async () => {
         const url = window.location.href;
@@ -122,6 +127,14 @@ function Productdetails() {
         setBiddingAmount(value);
     };
 
+    let keyPointsList = [];
+    try {
+        keyPointsList = JSON.parse(product.keyPoints || '[]');
+    } catch (err) {
+        console.error("Failed to parse keyPoints", err);
+    }
+
+    const [user_id, setUser_id] = useState([]);
     const navigate = useNavigate();
     useEffect(() => {
         const getUserData = async () => {
@@ -132,24 +145,75 @@ function Productdetails() {
                     return;
                 }
 
-                const response = await axios.get("http://localhost:3000/access/ipro", {
+                const response = await axios.get("http://localhost:3000/access/innerproduct", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
                 });
                 setUser_id(response.data.userId);
 
+
             } catch (err) {
                 console.error(err);
-                navigate('/login');
+                //   navigate('/login');
             }
         };
         getUserData();
     }, []);
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (user_id) {
+            if (!errorMessage && biddingAmount) {
+                try {
+                    const response = await fetch("http://localhost:3000/submitBid", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            productId: productId,
+                            userId: user_id,
+                            amount: parseInt(biddingAmount, 10),
+                        }),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert("Bid submitted successfully!");
+                    } else {
+                        alert(data.message || "Bid submission failed.");
+                    }
+                } catch (error) {
+                    console.error("Bid submission error:", error);
+                    alert("Network error occurred while submitting your bid.");
+                }
+            }
+        }
+    };
+
+    const [highestBid, setHighestBid] = useState(null);
+
+    useEffect(() => {
+        const highBids = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/highestBid/${productId}`);
+                setHighestBid(response.data);
+            } catch (err) {
+                console.error("Error fetching value:", err);
+                alert("Failed to fetch value.");
+            }
+        };
+        highBids();
+    }, [productId]);
+
+
+
     return (
         <>
             <Navigation />
+            <Filter />
             <div className="bg-white">
                 <div className="container mx-auto px-6 py-8">
                     <div className="flex flex-wrap -mx-4">
@@ -184,8 +248,14 @@ function Productdetails() {
                                 <div className="mb-6 flex flex-col justify-center items-center">
                                     <h3 className="text-md font-semibold mb-2">Highest Bid</h3>
                                     <div className="flex space-x-2">
-                                        <input disabled value={product.bidding_amount ? product.bidding_amount : `None`}
-                                            className="w-20 border border-gray-300 px-4 py-2 rounded shadow-md" />
+                                        <input
+                                            disabled
+                                            value={highestBid !== null ? highestBid.highBid : "000"}
+                                            className={`w-20 border text-center px-4 py-2 rounded shadow-md ${highestBid && highestBid.user === user_id
+                                                    ? "border-green-500 text-green-600"
+                                                    : "border-red-500 text-red-600"}`}
+                                        />
+
                                     </div>
                                 </div>
                                 <div className="mb-6 flex flex-col justify-center items-center">
@@ -199,11 +269,9 @@ function Productdetails() {
                                 </div>
                             </div>
 
-                            <form>
+                            <form onSubmit={handleSubmit}>
                                 <div className="mb-6">
                                     <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">Bid your amount:</label>
-
-                                    <input type="hidden" value={user_id} name="userid" />
 
                                     <input
                                         type="text"
@@ -238,11 +306,10 @@ function Productdetails() {
                             </form>
                             <div>
                                 <h3 className="text-lg font-semibold mb-2">Key Features:</h3>
-                                <ul className="list-disc list-inside text-gray-700">
-                                    <li>Industry-leading noise cancellation</li>
-                                    <li>30-hour battery life</li>
-                                    <li>Touch sensor controls</li>
-                                    <li>Speak-to-chat technology</li>
+                                <ul className="list-disc ml-6">
+                                    {keyPointsList.map((point, index) => (
+                                        <li key={index}>{point}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -255,4 +322,4 @@ function Productdetails() {
     )
 }
 
-export default Productdetails
+export default Innerprodetails

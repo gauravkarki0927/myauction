@@ -4,9 +4,9 @@ import user from '../pictures/user.jpg';
 function Reviews() {
     return (
         <>
-            <section class="body-font xl:px-16 lg:px-12 md:px-10 px-6 py-3" id="reviews">
-                <div class="container px-5 py-24 mx-auto">
-                    <h1 class="text-3xl font-medium title-font text-gray-900 mb-12 text-center">What others say?</h1>
+            <section className="body-font xl:px-16 lg:px-12 md:px-10 px-6 py-3" id="reviews">
+                <div className="container px-5 py-24 mx-auto">
+                    <h1 className="text-3xl font-medium title-font text-gray-900 mb-12 text-center">What others say?</h1>
                     <div className="flex flex-wrap -m-4">
                         <div className="px-2 py-4 lg:w-1/3 md:w-full animate">
                             <div className="space-y-2 border-2 rounded-lg border-gray-200 border-opacity-50 p-2">

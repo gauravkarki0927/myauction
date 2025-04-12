@@ -269,8 +269,6 @@ function Adduser() {
         }
     };
 
-    const navigate = useNavigate();
-
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
@@ -286,10 +284,10 @@ function Adduser() {
                     },
                 })
                 .then((res) => {
-                    alert('Registration Successful');
+                    alert('User added Successful');
                 })
                 .catch((err) => {
-                    alert('Registration failed. Please try again.');
+                    alert('Failed to add user. Please try again.');
                     console.log(err);
                 });
         }
@@ -297,7 +295,7 @@ function Adduser() {
 
     return (
         <>
-            <form id="registrationForm" onSubmit={handleSubmit} className="p-2">
+            <form onSubmit={handleSubmit} className="p-2">
                 <div className="mb-4">
                     <p className="flex text-center w-full items-center justify-center py-2 text-xl">
                         Add User

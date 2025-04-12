@@ -3,11 +3,12 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
 import Footer from '../Footer';
-import user from '../../pictures/user.jpg';
+import user_img from '../../pictures/user.jpg';
 
 function Profile() {
   const [activeTab, setActiveTab] = useState('profile');
-  const [profilePicSrc, setProfilePicSrc] = useState(user);
+  const [profilePicSrc, setProfilePicSrc] = useState(user_img);
+  const [user, setUser] = useState({});
   const inputFileRef = useRef(null);
 
   const handleTabChange = (tab) => {
@@ -40,7 +41,7 @@ function Profile() {
             Authorization: `Bearer ${token}`,
           }
         });
-        console.log(response.data);
+        setUser(response.data.userId);
 
       } catch (err) {
         console.error(err);
@@ -49,6 +50,24 @@ function Profile() {
     };
     getUserData();
   }, []);
+
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.post("http://localhost:3000/userProfile", {
+          userId: user,
+        });
+        if (response.data.length > 0) {
+          setUser(response.data[0]);
+        }
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    };
+
+    fetchProduct();
+  }, [user]);
 
 
   return (
@@ -91,7 +110,7 @@ function Profile() {
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
                     <div className="flex flex-col items-center px-4">
                       <div className="w-36 h-42 border border-gray-200 rounded overflow-hidden mb-4">
-                        <img src={user} alt="User Avatar" className="w-full h-full object-cover" />
+                        <img src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : user_img} alt="User Avatar" className="w-full h-full object-cover" />
                       </div>
                       <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">
                         <button className="text-gray-600 border border-gray-200 px-16 py-1 bg-white outline-none cursor-pointer text-[13px] font-semibold rounded-md">
@@ -103,7 +122,7 @@ function Profile() {
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6] my-2">User Login</label>
                         <input
-                         value="jane.doe@email.com"
+                          value={user.user_email}
                           className="w-full border-gray-300 placeholder:text-[14px] outline-none px-2 py-1 rounded border border-gray-50 text-gray-700 text-[14px]"
                           disabled
                         />
@@ -111,9 +130,8 @@ function Profile() {
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6] my-2">User Password</label>
                         <input
-                          type="password"
-                           value="password"
                           className="w-full border-gray-300 outline-none px-2 py-1 rounded border border-gray-50 text-gray-700 text-[14px]"
+                          placeholder="********"
                           disabled
                         />
                       </div>
@@ -126,36 +144,32 @@ function Profile() {
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Username</label>
                           <input
-                            type="text"
+                            value={user.user_name}
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                            value="jane.doe"
                             disabled
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">State</label>
                           <input
-                            type="text"
+                            value={user.user_state}
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                            value="Jane"
                             disabled
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">District</label>
                           <input
-                            type="text"
+                            value={user.user_district}
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                            value="Doe"
                             disabled
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Street/Village</label>
                           <input
-                            type="text"
+                            value={user.user_street}
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                            value="Admin"
                             disabled
                           />
                         </div>
@@ -164,6 +178,14 @@ function Profile() {
                     <div>
                       <h3 className="text-lg font-semibold text-gray-800 mb-4">Contact Info</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-[#1b1b1ee6]">Contact</label>
+                          <input
+                            value={user.user_phone}
+                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
+                            disabled
+                          />
+                        </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Postal</label>
                           <input
@@ -182,14 +204,6 @@ function Profile() {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Website</label>
-                          <input
-                            type="text"
-                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                            disabled
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-[#1b1b1ee6]">Telegram</label>
                           <input
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
@@ -219,14 +233,13 @@ function Profile() {
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
                     <div className="flex flex-col items-center px-4">
                       <div className="w-36 h-42 rounded overflow-hidden mb-4">
-                        <img src={profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
+                        <img src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
                       </div>
-                      
+
                       <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">
                         <input
                           type="file"
                           accept="image/*"
-                          id="image"
                           ref={inputFileRef}
                           onChange={handleFileChange}
                           style={{ display: 'none' }}
@@ -244,20 +257,20 @@ function Profile() {
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6] my-2">User Login</label>
                         <input
-                        name="email"
+                          name="email"
                           type="email"
                           placeholder="Your login email"
-                          value="jane.doe@email.com"
-                          className="w-full border-gray-300 placeholder:text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
+                          value={user.user_email}
+                          className="w-full border-gray-300 placeholder:text-[14px] text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6] my-2">User Password</label>
                         <input
-                        name="password"
+                          name="password"
                           type="password"
                           placeholder="Your password.."
-                          className="w-full border-gray-300 placeholder:text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
+                          className="w-full border-gray-300 placeholder:text-[14px] text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                         />
                       </div>
                     </div>
@@ -269,37 +282,37 @@ function Profile() {
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Username</label>
                           <input
-                          name="user"
+                            name="user"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value="jane.doe"
+                            value={user.user_name}
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">State</label>
                           <input
-                          name="state"
+                            name="state"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value="Jane"
+                            value={user.user_state}
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">District</label>
                           <input
-                          name="district"
+                            name="district"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value="Doe"
+                            value={user.user_district}
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Street/Village</label>
                           <input
-                          name="street"
+                            name="street"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value="Admin"
+                            value={user.user_street}
                           />
                         </div>
                       </div>
@@ -308,18 +321,26 @@ function Profile() {
                       <h3 className="text-lg font-semibold text-gray-800 mb-4">Contact Info</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-[#1b1b1ee6]">Postal</label>
+                          <label className="block text-sm font-medium text-[#1b1b1ee6]">Contact</label>
                           <input
-                          name="postal"
+                            name="postal"
                             type="postal"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value=""
+                            value={user.user_phone}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#1b1b1ee6]">Postal</label>
+                          <input
+                            name="social1"
+                            type="text"
+                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">WhatsApp</label>
                           <input
-                          name="social1"
+                            name="social2"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
                           />
@@ -327,15 +348,7 @@ function Profile() {
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Website</label>
                           <input
-                          name="social2"
-                            type="text"
-                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-[#1b1b1ee6]">Telegram</label>
-                          <input
-                          name="social3"
+                            name="social3"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
                           />
@@ -347,7 +360,7 @@ function Profile() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">About the User</h3>
                   <textarea
-                  name="bio"
+                    name="bio"
                     className="w-full mt-1 border-gray-300 text-gray-700 text-[14px] outline-none p-2 rounded border border-gray-50 resize-none"
                     rows="4"
                   >

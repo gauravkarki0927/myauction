@@ -269,6 +269,13 @@ function Signup() {
         }
     };
 
+    // const [viewPass, setViewPass] = useState([]);
+    // const passHaldler = () =>{
+    //     if(password.type == "password"){
+    //         setViewPass(true);
+    //     }
+    // }
+
     const navigate = useNavigate();
 
     const handleSubmit = (e) => {

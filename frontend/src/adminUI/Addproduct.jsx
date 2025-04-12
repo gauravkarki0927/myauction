@@ -13,6 +13,7 @@ function Addproduct() {
     type: '',
     days: '',
     description: '',
+    keypoints: [''],
   });
 
   const handleInputChange = (e) => {
@@ -90,6 +91,21 @@ function Addproduct() {
     return isValid;
   };
 
+  const handleKeypointChange = (index, value) => {
+    const updatedKeypoints = [...formData.keypoints];
+    updatedKeypoints[index] = value;
+    setFormData({ ...formData, keypoints: updatedKeypoints });
+  };
+
+  const handleAddKeypoint = () => {
+    setFormData({ ...formData, keypoints: [...formData.keypoints, ''] });
+  };
+
+  const handleRemoveKeypoint = (index) => {
+    const updatedKeypoints = formData.keypoints.filter((_, i) => i !== index);
+    setFormData({ ...formData, keypoints: updatedKeypoints });
+  };
+
 
   const navigate = useNavigate();
 
@@ -122,7 +138,7 @@ function Addproduct() {
 
   return (
     <>
-      <form id="registrationForm" className="p-2" onSubmit={handleSubmit}>
+      <form className="p-2" onSubmit={handleSubmit}>
         <div className="mb-4">
           <p className="flex text-center w-full items-center justify-center py-2 text-xl">
             Insert Your Product
@@ -132,7 +148,6 @@ function Addproduct() {
           </label>
           <input
             type="text"
-            id="proName"
             name="proName"
             value={formData.proName}
             onChange={handleInputChange}
@@ -149,7 +164,6 @@ function Addproduct() {
           </label>
           <input
             type="text"
-            id="otherName"
             name="otherName"
             value={formData.otherName}
             onChange={handleInputChange}
@@ -166,7 +180,6 @@ function Addproduct() {
           </label>
           <input
             type="text"
-            id="price"
             name="price"
             value={formData.price}
             onChange={handleInputChange}
@@ -183,7 +196,6 @@ function Addproduct() {
           </label>
           <input
             type="file"
-            id="proImage"
             name="proImage"
             accept="image/jpeg, image/jpg, image/png"
             multiple
@@ -200,7 +212,6 @@ function Addproduct() {
           </label>
           <select
             name="type"
-            id="type"
             value={formData.type}
             onChange={handleInputChange}
             className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
@@ -225,7 +236,6 @@ function Addproduct() {
           </label>
           <input
             type="text"
-            id="days"
             name="days"
             value={formData.days}
             onChange={handleInputChange}
@@ -241,15 +251,45 @@ function Addproduct() {
             Product Details <span className="text-red-500">*</span>
           </label>
           <textarea
-            id="description"
             name="description"
             rows="5"
-            placeholder="Enter item details"
+            placeholder="Enter product details..."
             className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100 resize-none"
           ></textarea>
           {errors.description && (
             <p className="mt-1 text-sm text-red-500">{errors.description}</p>
           )}
+        </div>
+        <div className="mb-4">
+          <label htmlFor="keypoints" className="block text-sm font-medium mb-1">
+            Key Points <span className="text-red-500">*</span>
+          </label>
+          {formData.keypoints.map((point, index) => (
+            <div key={index} className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                value={point}
+                onChange={(e) => handleKeypointChange(index, e.target.value)}
+                placeholder={`${index + 1}. Extra key point`}
+                className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveKeypoint(index)}
+                className="bg-red-500 text-[12px] cursor-pointer text-white px-1 rounded"
+                disabled={formData.keypoints.length === 1}
+              >
+                X
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleAddKeypoint}
+            className="mt-2 text-sm text-blue-600 hover:underline"
+          >
+            + Add another key point
+          </button>
         </div>
         <div className="w-full flex justify-end">
           <button

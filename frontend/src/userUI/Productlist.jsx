@@ -30,11 +30,11 @@ function Productlist() {
             <div className="flex flex-col gap-2 py-4" id="product">
                 <div className="flex justify-between items-center py-3 xl:px-14 lg:px-16 md:px-18 sm:px-6 px-4">
                     <h1 className="text-xl font-semibold">Products for Bids</h1>
-                    <a className="text-pink-900 text-[13px]" href="/viewmore">View more <i class="px-1 fa-solid fa-angle-right"></i></a>
+                    <a className="text-pink-900 text-[13px]" href="/viewmore">View more <i className="px-1 fa-solid fa-angle-right"></i></a>
                 </div>
                 <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
                     {product.map(data => (
-                        <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
+                        <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]" key={data.product_id}>
                             <div className="relative">
                                 <div className="cursor-pointer">
                                     {JSON.parse(data.proImage)[0] && (
@@ -42,7 +42,7 @@ function Productlist() {
                                             className="w-full"
                                             src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
                                             alt="Product Image"
-                                            onClick={() => productDetails(data.pid)}
+                                            onClick={() => productDetails(data.product_id)}
                                         />
                                     )}
                                     <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
@@ -76,7 +76,10 @@ function Productlist() {
 
                                     const formatted = `${month}-${day}-${year}, ${hours}:${minutes} ${ampm}`;
 
-                                    return <p className="text-red-800 text-[13px]">Ends at {formatted}</p>;
+                                    if (endDate < new Date()) {
+                                        return <p className="text-red-800 text-[13px] font-semibold">Auction Ended</p>;
+                                    }
+                                    return <p className="text-red-800 text-[13px]">Ends at {formatted}</p>;                                    
                                 })()}
 
                                 <div className="flex items-center justify-between">

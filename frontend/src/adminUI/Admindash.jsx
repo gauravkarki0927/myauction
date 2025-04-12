@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios'
 import logo from '../pictures/auclogo.jpg';
 import Addproduct from './Addproduct';
 import Adduser from './Adduser';
@@ -18,6 +20,35 @@ function Admindash() {
         setActiveSection(sectionId);
     };
 
+    const [user_id, setUser_id] = useState(null);
+    const navigate = useNavigate();
+    useEffect(() => {
+        const getUserData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate('/login');
+                    return;
+                }
+
+                const response = await axios.get("http://localhost:3000/access/userdash", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+                setUser_id(response.data.userId);
+            } catch (err) {
+                console.error(err);
+                navigate('/login');
+            }
+        };
+        getUserData();
+    }, [navigate]);
+
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/login');
+    }
     return (
         <>
             <div className="w-full h-auto">
@@ -44,7 +75,7 @@ function Admindash() {
                         <button onClick={() => handleButtonClick('sendmail')}>
                             <i className="fa-regular fa-envelope text-red-600 cursor-pointer border border-gray-100 p-1 md:p-2 bg-gray-100 hover:bg-red-600 hover:text-white rounded-full"></i>
                         </button>
-                        <button>
+                        <button onClick={handleLogout}>
                             <i className="fa-solid fa-right-to-bracket cursor-pointer border border-gray-100 p-1 md:p-2 bg-gray-100 hover:bg-black hover:text-white rounded-full"></i>
                         </button>
                     </div>
@@ -194,7 +225,7 @@ function Admindash() {
                                         />
                                         <button className="cursor-pointer"
                                             type="submit">
-                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                            <i className="fa-solid fa-magnifying-glass"></i>
                                         </button>
                                     </form>
                                     <form className="flex gap-2 bg-white w-[300px] px-2 rounded-md border border-gray-200 text-[14px]">
@@ -205,7 +236,7 @@ function Admindash() {
                                         />
                                         <button className="cursor-pointer"
                                             type="submit">
-                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                            <i className="fa-solid fa-magnifying-glass"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -265,13 +296,13 @@ function Admindash() {
                             id="profile"
                             className={`h-[600px] w-full overflow-y-scroll ${activeSection === 'profile' ? 'block' : 'hidden'
                                 }`} >
-                            <Admin />
+                            <Admin uid={user_id} />
                         </div>
                         <div
                             id="editprofile"
                             className={`h-[600px] w-full overflow-y-scroll ${activeSection === 'editprofile' ? 'block' : 'hidden'
                                 }`} >
-                            <Editprofile />
+                            <Editprofile ussid={user_id} />
                         </div>
                         <div
                             id="notify"
@@ -283,7 +314,7 @@ function Admindash() {
                             id="sendmail"
                             className={`h-[600px] w-full overflow-y-scroll ${activeSection === 'sendmail' ? 'block' : 'hidden'
                                 }`} >
-                            <Sendmail />
+                            {/* <Sendmail /> */}
                         </div>
                     </div>
                 </div>

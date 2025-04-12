@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import Footer from '../Footer'
-import Filter from '../Filter'
 
 import sad from '../../pictures/sad.png';
 import Navigation from './Navigation';
+import Filter from '../Filter';
+import Footer from '../Footer';
 
 function Innersearch() {
 
@@ -16,6 +16,31 @@ function Innersearch() {
     const [noResultData, setNoResultData] = useState([]);
     const location = useLocation();
     const searchItem = location.state?.searchItem || '';
+
+    const navigate = useNavigate();
+    useEffect(() => {
+        const getUserData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate('/login');
+                    return;
+                }
+
+                const response = await axios.get("http://localhost:3000/access/myitems", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+                setUser_id(response.data.userId);
+
+            } catch (err) {
+                console.error(err);
+                navigate('/login');
+            }
+        };
+        getUserData();
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -52,33 +77,9 @@ function Innersearch() {
         }
     }, [searchItem]);
 
-    const navigate = useNavigate();
-    useEffect(() => {
-        const getUserData = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    navigate('/login');
-                    return;
-                }
-
-                const response = await axios.get("http://localhost:3000/access/myitems", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    }
-                });
-                setUser_id(response.data.userId);
-
-            } catch (err) {
-                console.error(err);
-                navigate('/login');
-            }
-        };
-        getUserData();
-    }, []);
 
     const productDetails = (PID) => {
-        navigate(`/iproduct?pid=${PID}`);
+        navigate(`/innerproduct?pid=${PID}`);
 
     };
 
@@ -94,7 +95,7 @@ function Innersearch() {
                 {product.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
                         {product.map(data => (
-                            <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
+                            <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]" key={data.product_id}>
                                 <div className="relative">
                                     <div className="cursor-pointer">
                                         {JSON.parse(data.proImage)[0] && (
@@ -102,7 +103,7 @@ function Innersearch() {
                                                 className="w-full"
                                                 src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
                                                 alt="Product Image"
-                                                onClick={() => productDetails(data.pid)}
+                                                onClick={() => productDetails(data.product_id)}
                                             />
                                         )}
                                         <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
@@ -140,7 +141,7 @@ function Innersearch() {
                                     })()}
                                     <div className="flex items-center justify-between">
                                         <span className="font-bold text-lg">Rs.{data.price}</span>
-                                        <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer" onClick={() => productDetails(data.pid)}>
+                                        <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer" onClick={() => productDetails(data.product_id)}>
                                             Bid Now
                                         </button>
                                     </div>
@@ -151,7 +152,7 @@ function Innersearch() {
                 ) : selectedFilter.length > 0 ? (
                     <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
                         {selectedFilter.map(data => (
-                            <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
+                            <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]" key={data.product_id}>
                                 <div className="relative">
                                     <div className="cursor-pointer">
                                         {JSON.parse(data.proImage)[0] && (
@@ -159,7 +160,7 @@ function Innersearch() {
                                                 className="w-full"
                                                 src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
                                                 alt="Product Image"
-                                                onClick={() => productDetails(data.pid)}
+                                                onClick={() => productDetails(data.product_id)}
                                             />
                                         )}
                                         <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
@@ -197,7 +198,7 @@ function Innersearch() {
                                     })()}
                                     <div className="flex items-center justify-between">
                                         <span className="font-bold text-lg">Rs.{data.price}</span>
-                                        <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer" onClick={() => productDetails(data.pid)}>
+                                        <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer" onClick={() => productDetails(data.product_id)}>
                                             Bid Now
                                         </button>
                                     </div>

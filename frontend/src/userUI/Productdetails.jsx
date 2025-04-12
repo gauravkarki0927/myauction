@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from 'react-router-dom';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Usernav from "./Usernav";
 import Related from "./Related";
 import Footer from "./Footer";
+import axios from 'axios'
 
 function Productdetails() {
 
     const [product, setProduct] = useState({});
+    const [images, setImages] = useState([]);
     const [searchParams] = useSearchParams();
+    const productId = searchParams.get('pid');
 
     useEffect(() => {
         const fetchProduct = async () => {
-            const productId = searchParams.get('pid');
 
             try {
                 const response = await fetch(`http://localhost:3000/productDetails/${productId}`, {
@@ -21,11 +23,15 @@ function Productdetails() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    setProduct(data);
+                    console.log(data);
+
+                    const productData = data[0];
+                    setProduct(productData);
 
                     try {
-                        const parsedImages = JSON.parse(data.proImage);
+                        const parsedImages = JSON.parse(productData.proImage);
                         setImages(parsedImages);
+
                         const initialImage = `http://localhost:3000/productImage/${parsedImages[0]}`;
                         setMainImageSrc(initialImage);
                     } catch (err) {
@@ -41,12 +47,12 @@ function Productdetails() {
         fetchProduct();
     }, [searchParams]);
 
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
     const [mainImageSrc, setMainImageSrc] = useState(null);
-    const [images, setImages] = useState([]);
     const changeImage = (src) => {
         setMainImageSrc(src);
     };
@@ -110,7 +116,7 @@ function Productdetails() {
         else if (!/^\d+$/.test(value)) {
             setErrorMessage("Please enter a valid number.");
         }
-        else if (parseInt(value, 10) <= product.price) {
+        else if (parseInt(value, 10) <= highestBid.highBid) {
             setErrorMessage("Please enter higher amount.");
         }
         else {
@@ -119,6 +125,38 @@ function Productdetails() {
 
         setBiddingAmount(value);
     };
+
+    let keyPointsList = [];
+    try {
+        keyPointsList = JSON.parse(product.keyPoints || '[]');
+    } catch (err) {
+        console.error("Failed to parse keyPoints", err);
+    }
+
+    const navigate = useNavigate();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!localStorage.getItem('token')) {
+            navigate('/login');
+        }
+        navigate('/login');
+    };
+
+    const [highestBid, setHighestBid] = useState(null);
+
+    useEffect(() => {
+        const highBids = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/highestBid/${productId}`);
+                setHighestBid(response.data);
+            } catch (err) {
+                console.error("Error fetching value:", err);
+                alert("Failed to fetch value.");
+            }
+        };
+        highBids();
+    }, [productId]);
 
 
     return (
@@ -158,8 +196,11 @@ function Productdetails() {
                                 <div className="mb-6 flex flex-col justify-center items-center">
                                     <h3 className="text-md font-semibold mb-2">Highest Bid</h3>
                                     <div className="flex space-x-2">
-                                        <input disabled value={product.bidding_amount ? product.bidding_amount : `None`}
-                                            className="w-20 border border-gray-300 px-4 py-2 rounded shadow-md" />
+                                        <input
+                                            disabled
+                                            value={highestBid !== null ? `Rs.${highestBid.highBid}` : "000"}
+                                            className="w-24 border border-gray-300 text-center px-2 py-2 rounded shadow-md"
+                                        />
                                     </div>
                                 </div>
                                 <div className="mb-6 flex flex-col justify-center items-center">
@@ -173,7 +214,7 @@ function Productdetails() {
                                 </div>
                             </div>
 
-                            <form>
+                            <form onSubmit={handleSubmit}>
                                 <div className="mb-6">
                                     <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">Bid your amount:</label>
 
@@ -210,11 +251,10 @@ function Productdetails() {
                             </form>
                             <div>
                                 <h3 className="text-lg font-semibold mb-2">Key Features:</h3>
-                                <ul className="list-disc list-inside text-gray-700">
-                                    <li>Industry-leading noise cancellation</li>
-                                    <li>30-hour battery life</li>
-                                    <li>Touch sensor controls</li>
-                                    <li>Speak-to-chat technology</li>
+                                <ul className="list-disc ml-6">
+                                    {keyPointsList.map((point, index) => (
+                                        <li key={index}>{point}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
