@@ -139,6 +139,17 @@ function Myitems() {
     setFormData({ ...formData, keypoints: updatedKeypoints });
   };
 
+  console.log(formData);
+
+  useEffect(() => {
+    if (user_id) {
+      setFormData((prevData) => ({
+        ...prevData,
+        userId: user_id,
+      }));
+    }
+  }, [user_id]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
@@ -155,6 +166,7 @@ function Myitems() {
             formDataToSend.append(key, formData[key]);
           }
         }
+
 
         const response = await fetch('http://localhost:3000/additems', {
           method: 'POST',
@@ -299,7 +311,7 @@ function Myitems() {
                   className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
                 >
                   <option value="">-Choose Categories-</option>
-                  <option value="Eletronics">Electronics</option>
+                  <option value="Electronics">Electronics</option>
                   <option value="Communication">Communication</option>
                   <option value="Transport">Transport</option>
                   <option value="Antique">Antique</option>

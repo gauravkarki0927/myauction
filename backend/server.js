@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false })); // For form data
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -171,7 +171,6 @@ app.get('/users', (req, res) => {
     db.query(sql, (err, results) => {
         if (err) {
             console.error('Error fetching users:', err);
-            return res.status(500).json({ error: 'Failed to fetch users' });
         }
         res.status(200).json(results);
 
@@ -427,6 +426,31 @@ app.get('/highestBid/:pid', async (req, res) => {
 });
 
 
+// API Route to store checkout data
+app.post('/checkout', (req, res) => {
+    const {
+        user,
+        email,
+        phone,
+        state,
+        district,
+        street,
+        postal
+    } = req.body;
+
+    const query = `
+        INSERT INTO check_out (user_name, email, phone, state, district, street, postal_code)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(query, [user, email, phone, state, district, street, postal], (err, result) => {
+        if (err) {
+            console.error('Error inserting data:', err);
+            return res.status(500).json({ message: 'Failed to submit checkout data' });
+        }
+        res.status(200).json({ message: 'Checkout submitted successfully' });
+    });
+});
 
 // route to fetch user profile
 // app.get('/userPro:id', (req, res) => {
@@ -467,6 +491,6 @@ app.get('/highestBid/:pid', async (req, res) => {
 //     });
 // });
 
-app.listen(process.env.PORT, () => {
+app.listen(3000, () => {
     console.log('Server listening at port 3000');
 });

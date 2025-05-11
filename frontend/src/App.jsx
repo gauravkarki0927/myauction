@@ -27,6 +27,7 @@ import Test from './userUI/access/Test';
 import Admindash from './adminUI/Admindash';
 import Innerprodetails from './userUI/access/Innerprodetails';
 import Ifilter from './userUI/access/Ifilter';
+import Forgetpass from './userUI/Forgetpass';
 
 function App() {
   return (
@@ -36,9 +37,9 @@ function App() {
         <Route path="/usernav" element={<Usernav />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        {/* <Route path="/forget" element={<Forgetpass />} />
-        <Route path="/otp" element={<OTP />} />
-        <Route path="/reset" element={<Resetpass />} /> */}
+        <Route path="/forget" element={<Forgetpass />} />
+        {/* <Route path="/otp" element={<OTP />} /> */}
+        {/* <Route path="/reset" element={<Resetpass />} /> */}
         <Route path="/product" element={<Productdetails />} />
         <Route path="/viewmore" element={<Viewmore />} />
         <Route path="/allproducts" element={<Allproducts />} />

@@ -1,5 +1,6 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from "uuid";
 import CryptoJS from "crypto-js";
 import esewa from '../../pictures/esewa_og.webp';
@@ -10,6 +11,8 @@ import Footer from '../Footer';
 
 const Finalview = () => {
 
+    const location = useLocation();
+    const checkout_data = location.state;
     const [formData, setformData] = useState({
         amount: "10",
         tax_amount: "0",
@@ -72,7 +75,7 @@ const Finalview = () => {
                         <input
                             id="name"
                             type="text"
-                            value=""
+                            value={checkout_data?.user}
                             disabled
                             className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-2 mb-2 w-full"
                         />
@@ -82,7 +85,7 @@ const Finalview = () => {
                         <input
                             id="email"
                             type="text"
-                            value=""
+                            value={checkout_data?.email}
                             disabled
                             className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-2 mb-2 w-full"
                         />
@@ -92,7 +95,7 @@ const Finalview = () => {
                         <input
                             id="phone"
                             type="text"
-                            value=""
+                            value={checkout_data?.phone}
                             disabled
                             className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-2 mb-2 w-full"
                         />
@@ -104,7 +107,7 @@ const Finalview = () => {
                                 <input
                                     id="state"
                                     type="text"
-                                    value=""
+                                    value={checkout_data?.state}
                                     disabled
                                     className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-2 mb-2 w-full"
                                 />
@@ -116,7 +119,7 @@ const Finalview = () => {
                                 <input
                                     id="district"
                                     type="text"
-                                    value=""
+                                    value={checkout_data?.district}
                                     disabled
                                     className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-2 mb-2 w-full"
                                 />
@@ -130,7 +133,7 @@ const Finalview = () => {
                         <input
                             id="street"
                             type="text"
-                            value=""
+                            value={checkout_data?.street}
                             disabled
                             className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-2 mb-2 w-full"
                         />
@@ -140,7 +143,7 @@ const Finalview = () => {
                         <input
                             id="postal"
                             type="text"
-                            value=""
+                            value={checkout_data?.postal}
                             disabled
                             className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-2 mb-2 w-full"
                         />

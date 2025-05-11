@@ -147,10 +147,10 @@ function Signup() {
         const newErrors = {};
 
         if (!formData.name.trim()) {
-            newErrors.name = 'Product Name is required';
+            newErrors.name = 'User Name is required';
             isValid = false;
         } else if (!/^[A-Za-z\s]+$/.test(formData.name)) {
-            newErrors.proName = 'Product Name must contain only alphabets';
+            newErrors.name = 'User Name must contain only alphabets';
             isValid = false;
         }
         if (!formData.email.trim()) {
@@ -379,7 +379,7 @@ function Signup() {
 
                                 <div className="mb-4">
                                     <label htmlFor="password_confirmation" className="block text-sm font-medium">
-                                        Confirm Password
+                                        Confirm Password <span className="text-red-500">*</span>
                                     </label>
                                     <div className="mt-1 rounded-md shadow-sm bg-transparent relative">
                                         <input id="cpassword" name="cpassword" type="password" placeholder="*********" onChange={handleChange} value={formData.cpassword}

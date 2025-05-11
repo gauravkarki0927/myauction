@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import esewa from '../../pictures/esewa_og.webp';
 import khalti from '../../pictures/khalti.jpg';
 import imepay from '../../pictures/imepay.jpg';
 import Navigation from './Navigation';
 import Footer from '../Footer';
+
 
 const CheckoutPage = () => {
 
@@ -141,10 +143,10 @@ const CheckoutPage = () => {
         const newErrors = {};
 
         if (!formData.user.trim()) {
-            newErrors.user = 'Product Name is required';
+            newErrors.user = 'User Name is required';
             isValid = false;
         } else if (!/^[A-Za-z\s]+$/.test(formData.user)) {
-            newErrors.proName = 'Product Name must contain only alphabets';
+            newErrors.proName = 'User Name must contain only alphabets';
             isValid = false;
         }
 
@@ -191,11 +193,33 @@ const CheckoutPage = () => {
         return isValid;
     };
 
-    const handleSubmit = (e) => {
+    const navigate = useNavigate();
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
+            try {
+                const response = await fetch('http://localhost:3000/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+    
+                const result = await response.json();
+    
+                if (response.ok) {
+                    navigate('/access/finalview', { state: formData });
+                } else {
+                    alert(result.message || 'Something went wrong!');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Server error. Try again later.');
+            }
         }
-    }
+    };
+    
 
     return (
        <>
@@ -333,7 +357,7 @@ const CheckoutPage = () => {
                     <div className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-3 flex items-center justify-between gap-4">
                         <p className="font-semibold">Complete your checkout</p>
                         <button type="submit" className="bg-green-500 hover:bg-green-600 text-white rounded-[2px] shadow-md px-8 py-1 cursor-pointer text-[16px] font-semibold">
-                            <a href="/access/finalview">APPLY</a>
+                            APPLY
                         </button>
                     </div>
                 </div>
