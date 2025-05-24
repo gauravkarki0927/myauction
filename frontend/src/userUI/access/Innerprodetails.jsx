@@ -66,6 +66,8 @@ function Innerprodetails() {
         const endDate = new Date(postDate);
         endDate.setDate(endDate.getDate() + product.days);
 
+        endDate.setMinutes(endDate.getMinutes() - 30);
+
         const updateRemainingTime = () => {
             const now = new Date();
             const timeDiff = endDate - now;
@@ -237,27 +239,19 @@ function Innerprodetails() {
                         <div className="w-full md:w-1/2 px-4">
                             <h2 className="text-3xl font-bold mb-2">{product.productName}</h2>
                             <p className="text-gray-600 mb-4">{product.otherName}</p>
-                            <div className="mb-4">
-                                <span className="text-2xl font-bold mr-2">Rs.{product.price}/-</span>
+
+                            <div className="mb-4 flex flex-col">
+                                <span className={`text-2xl font-bold mr-2 ${highestBid && highestBid.user === user_id
+                                    ? "border-green-500 text-green-600"
+                                    : "border-red-500 text-red-600"}`}>{highestBid !== null ? `Rs.${highestBid.highBid}` : `Rs.${product.price}`}</span>
+                                <span className="text-[16px]">or Best Offer</span>
                             </div>
+
                             <p className="text-gray-700 mb-6">
                                 {product.description}
                             </p>
 
                             <div className="flex flex-wrap md:flex-nowrap gap-4">
-                                <div className="mb-6 flex flex-col justify-center items-center">
-                                    <h3 className="text-md font-semibold mb-2">Highest Bid</h3>
-                                    <div className="flex space-x-2">
-                                        <input
-                                            disabled
-                                            value={highestBid !== null ? highestBid.highBid : "000"}
-                                            className={`w-20 border text-center px-4 py-2 rounded shadow-md ${highestBid && highestBid.user === user_id
-                                                    ? "border-green-500 text-green-600"
-                                                    : "border-red-500 text-red-600"}`}
-                                        />
-
-                                    </div>
-                                </div>
                                 <div className="mb-6 flex flex-col justify-center items-center">
                                     <h3 className="text-md font-semibold mb-2">Remaining Time</h3>
                                     <div className="flex space-x-2">
@@ -277,7 +271,7 @@ function Innerprodetails() {
                                         type="text"
                                         id="biddingAmount"
                                         name="biddingAmount"
-                                        placeholder="$$$$"
+                                        placeholder="Rs."
                                         value={biddingAmount}
                                         onChange={(e) => setBiddingAmount(e.target.value)}
                                         onKeyUp={handleKeyUp}

@@ -118,7 +118,7 @@ function Users() {
                 <div className="flex flex-col md:flex-row">
                     <main className="flex-1">
                     {users.map(user => (
-                        <form className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2" key={user.user_id}>
+                        <form className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2">
                             <div className="flex flex-wrap justify-around w-full">
                                 <div className="w-full md:w-1/4 mb-6 md:mb-0">
                                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>

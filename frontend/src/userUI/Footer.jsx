@@ -33,7 +33,7 @@ function Footer() {
                                         <input
                                             type="email"
                                             id="UserEmail"
-                                            placeholder="john@rhcp.com"
+                                            placeholder="example@gmail.com"
                                             className="w-full border-none outline-none sm:text-sm"
                                         />
 

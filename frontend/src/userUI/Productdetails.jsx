@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import Usernav from "./Usernav";
 import Related from "./Related";
 import Footer from "./Footer";
 import axios from 'axios'
+import Nav from "./Nav";
+import Filter from "./Filter";
 
 function Productdetails() {
 
@@ -58,12 +59,15 @@ function Productdetails() {
     };
 
     const [remainingTime, setRemainingTime] = useState("");
-    const postDate = new Date(product.submitted);
-    const durationInDays = product.days;
 
     useEffect(() => {
+        if (!product.submitted || !product.days) return;
+
+        const postDate = new Date(product.submitted);
         const endDate = new Date(postDate);
-        endDate.setDate(endDate.getDate() + durationInDays);
+        endDate.setDate(endDate.getDate() + product.days);
+
+        endDate.setMinutes(endDate.getMinutes() - 30);
 
         const updateRemainingTime = () => {
             const now = new Date();
@@ -88,7 +92,7 @@ function Productdetails() {
         const timer = setInterval(updateRemainingTime, 1000);
 
         return () => clearInterval(timer);
-    }, [postDate, durationInDays]);
+    }, [product.submitted, product.days]);
 
     const handleShare = async () => {
         const url = window.location.href;
@@ -116,8 +120,8 @@ function Productdetails() {
         else if (!/^\d+$/.test(value)) {
             setErrorMessage("Please enter a valid number.");
         }
-        else if (parseInt(value, 10) <= highestBid.highBid) {
-            setErrorMessage("Please enter higher amount.");
+        else if (parseInt(value, 10) <= highestBid.highBid+20) {
+            setErrorMessage("Please enter 20 higher than amount.");
         }
         else {
             setErrorMessage("");
@@ -161,7 +165,8 @@ function Productdetails() {
 
     return (
         <>
-            <Usernav />
+            <Nav />
+            <Filter />
             <div className="bg-white">
                 <div className="container mx-auto px-6 py-8">
                     <div className="flex flex-wrap -mx-4">
@@ -185,24 +190,15 @@ function Productdetails() {
                         <div className="w-full md:w-1/2 px-4">
                             <h2 className="text-3xl font-bold mb-2">{product.productName}</h2>
                             <p className="text-gray-600 mb-4">{product.otherName}</p>
-                            <div className="mb-4">
-                                <span className="text-2xl font-bold mr-2">Rs.{product.price}/-</span>
+                            <div className="mb-4 flex flex-col">
+                                <span className="text-2xl font-bold mr-2">{highestBid !== null ? `Rs.${highestBid.highBid}` : `Rs.${product.price}`}</span>
+                                <span className="text-[16px]">or Best Offer</span>
                             </div>
                             <p className="text-gray-700 mb-6">
                                 {product.description}
                             </p>
 
                             <div className="flex flex-wrap md:flex-nowrap gap-4">
-                                <div className="mb-6 flex flex-col justify-center items-center">
-                                    <h3 className="text-md font-semibold mb-2">Highest Bid</h3>
-                                    <div className="flex space-x-2">
-                                        <input
-                                            disabled
-                                            value={highestBid !== null ? `Rs.${highestBid.highBid}` : "000"}
-                                            className="w-24 border border-gray-300 text-center px-2 py-2 rounded shadow-md"
-                                        />
-                                    </div>
-                                </div>
                                 <div className="mb-6 flex flex-col justify-center items-center">
                                     <h3 className="text-md font-semibold mb-2">Remaining Time</h3>
                                     <div className="flex space-x-2">
@@ -222,7 +218,7 @@ function Productdetails() {
                                         type="text"
                                         id="biddingAmount"
                                         name="biddingAmount"
-                                        placeholder="$$$$"
+                                        placeholder="Rs"
                                         value={biddingAmount}
                                         onChange={(e) => setBiddingAmount(e.target.value)}
                                         onKeyUp={handleKeyUp}

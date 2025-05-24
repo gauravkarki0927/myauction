@@ -46,7 +46,7 @@ function Productlist() {
                                         />
                                     )}
                                     <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
-                                        Available
+                                        {data.type}
                                     </div>
                                 </div>
                             </div>
