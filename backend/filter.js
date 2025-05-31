@@ -15,7 +15,6 @@ app.post('/filterItems', (req, res) => {
     } else if (searchItem === 'upcoming') {
         sql = 'SELECT * FROM products WHERE listed = 0';
     } else {
-        // Match product types like 'Antique', 'Artifact', etc.
         sql = 'SELECT * FROM products WHERE type LIKE ?';
         values = [`%${searchItem}%`];
     }

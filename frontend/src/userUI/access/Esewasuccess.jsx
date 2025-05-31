@@ -1,6 +1,42 @@
-import React from "react"
+import { React, useEffect } from "react"
+import { useLocation } from 'react-router-dom';
+
 
 function Esewasuccess() {
+
+    const location = useLocation();
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const encodedData = queryParams.get('data');
+
+        if (encodedData) {
+            try {
+                const decoded = atob(encodedData); // Decode Base64
+                const parsed = JSON.parse(decoded); // Parse JSON
+                console.log('Transaction Data:', parsed);
+
+                // ✅ Submit pid=1 if parsed data exists
+                fetch('http://localhost:3000/submitTransaction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ payment_id: parsed.transaction_code, tuid:parsed.transaction_uuid}),
+                })
+                    .then((res) => res.json())
+                    .then((responseData) => {
+                        console.log('Submission response:', responseData);
+                    })
+                    .catch((error) => {
+                        console.error('Error submitting pid:', error);
+                    });
+
+            } catch (error) {
+                console.error('Error decoding transaction data:', error);
+            }
+        }
+    }, [location.search]);
 
     return (
         <>

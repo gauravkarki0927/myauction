@@ -297,7 +297,6 @@ app.get('/allitems', (req, res) => {
 // route to get product details
 app.post('/productDetails/:id', (req, res) => {
     const productId = req.params.id;
-
     if (!Number.isInteger(parseInt(productId))) {
         return res.status(400).json({ error: 'Invalid product ID' });
     }
@@ -338,7 +337,7 @@ app.post('/searchItems', (req, res) => {
         } else {
             res.status(200).json([]);
         }
-        
+
     });
 });
 
@@ -361,8 +360,8 @@ app.post('/filterItems', (req, res) => {
         sql = 'SELECT * FROM add_products WHERE listed = 0';
     } else {
         sql = 'SELECT * FROM add_products WHERE type LIKE ?';
-        values = [`%${searchItem}%`];
     }
+    values = [`%${searchItem}%`];
 
     db.query(sql, values, (err, result) => {
         if (err) {
@@ -380,19 +379,91 @@ app.post('/filterItems', (req, res) => {
 
 // route to update the user biddings
 app.post('/submitBid', async (req, res) => {
+
     const { productId, userId, amount } = req.body;
 
-    const sql = "INSERT INTO user_biddings(pid, uid, amount) VALUES (?,?,?)";
-    const values = [productId, userId, amount];
-
-    db.query(sql, values, (err, results) => {
+    const productSql = "SELECT submitted, days FROM add_products WHERE product_id = ?";
+    db.query(productSql, [productId], (err, results) => {
         if (err) {
-            console.error('Error inserting biddings:', err);
-            return res.status(500).json({ error: 'Failed to insert bids' });
+            console.error('Error fetching product info:', err);
+            return res.status(500).json({ error: 'Failed to check auction status' });
         }
-        res.status(200).json({ message: 'Bidding successful' });
 
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        const submittedDate = new Date(results[0].submitted);
+        const days = results[0].days;
+        const auctionEndDate = new Date(submittedDate);
+        auctionEndDate.setDate(auctionEndDate.getDate() + days);
+
+        const now = new Date();
+
+        if (now > auctionEndDate) {
+            return res.status(400).json({ message: 'Auction has ended. Bidding is closed.' });
+        }
+
+        const insertSql = "INSERT INTO user_biddings(pid, uid, amount) VALUES (?, ?, ?)";
+        const insertValues = [productId, userId, amount];
+
+        db.query(insertSql, insertValues, (err, results) => {
+            if (err) {
+                console.error('Error inserting bid:', err);
+                return res.status(500).json({ error: 'Failed to insert bid' });
+            }
+
+            const fetchEmailsSql = `
+            SELECT DISTINCT us.user_email
+            FROM user_biddings ub
+            JOIN user_signup us ON ub.uid = us.user_id
+            WHERE ub.uid != ? AND ub.pid = ?
+        `;
+
+            db.query(fetchEmailsSql, [userId, productId], (err, bidderResults) => {
+                if (err) {
+                    console.error('Error fetching emails:', err);
+                    return res.status(500).json({ error: 'Bid placed, but failed to fetch previous bidders' });
+                }
+
+                const emails = bidderResults.map(row => row.user_email);
+                if (emails.length === 0) {
+                    return res.status(200).json({ message: 'Bid successful, no previous bidders to notify' });
+                }
+
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'myproject.gk01@gmail.com',
+                        pass: 'mjcy okrc vidj amcj'
+                    }
+                });
+
+                const mailOptions = {
+                    from: 'myproject.gk01@gmail.com',
+                    to: emails,
+                    subject: 'You have been outbid!',
+                    html: `
+                    <p>Hello user,</p>
+                    <p>Someone has placed a higher bid on an item you were bidding on.</p>
+                    <p><strong>New highest bid:</strong> Rs.${amount}</p>
+                    <p>Visit the auction site to place a new bid if you're still interested.</p>
+                    <p style="font-style: italic;">Online Auction System<br>Thank you</p>
+                `
+                };
+
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error('Email error:', error);
+                        return res.status(500).json({ message: 'Bid placed, but failed to send notifications' });
+                    } else {
+                        return res.status(200).json({ message: 'Bid successful and previous bidders notified' });
+                    }
+                });
+            });
+        });
     });
+
 });
 
 // route to get highest biddings
@@ -435,15 +506,18 @@ app.post('/checkout', (req, res) => {
         state,
         district,
         street,
-        postal
+        postal,
+        pid,
+        price,
+        tuid
     } = req.body;
 
     const query = `
-        INSERT INTO check_out (user_name, email, phone, state, district, street, postal_code)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO check_out (pid, price, user_name, email, phone, state, district, street, postal_code, tuid)
+        VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)
     `;
 
-    db.query(query, [user, email, phone, state, district, street, postal], (err, result) => {
+    db.query(query, [pid, price, user, email, phone, state, district, street, postal, tuid], (err, result) => {
         if (err) {
             console.error('Error inserting data:', err);
             return res.status(500).json({ message: 'Failed to submit checkout data' });
@@ -452,44 +526,169 @@ app.post('/checkout', (req, res) => {
     });
 });
 
-// route to fetch user profile
-// app.get('/userPro:id', (req, res) => {
-//     const [uid] = req.body;
-//     const sql = "SELECT * FROM user_signup WHERE `access`='User' user_id=?";
+// get all checkout records 
+app.get('/getcheckout', (req, res) => {
 
-//     db.query(sql, [uid], (err, results) => {
-//         if (err) {
-//             console.error('Error fetching user:', err);
-//             return res.status(500).json({ error: 'Failed to fetch user' });
-//         }
-//         res.status(200).json(results);
+    const query = 'SELECT * FROM check_out';
 
-//     });
-// });
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching data:', err);
+            return res.status(500).json({ error: 'Database query error' });
+        }
+
+        res.json(results);
+    });
+});
+
+app.get('/userproducts/:uid', (req, res) => {
+    const user_id = req.params.uid;
+
+    const query = 'SELECT * FROM add_products where uid=?';
+    db.query(query, [user_id], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(results);
+    });
+});
 
 // delete route to detete product
-// app.delete('/deletepro/:id', (req, res) => {
-//     const productId = req.params.id;
+app.delete('/deleteproduct/:id', (req, res) => {
+    const productId = req.params.id;
+    const query = 'DELETE FROM add_products WHERE product_id = ?';
 
-//     if (!Number.isInteger(parseInt(productId))) {
-//         return res.status(400).json({ error: 'Invalid user ID' });
-//     }
+    db.query(query, [productId], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
 
-//     const sql = 'DELETE FROM products WHERE pid = ?';
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        res.status(200).json({ message: 'Product deleted successfully' });
+    });
+});
 
-//     db.query(sql, [productId], (err, result) => {
-//         if (err) {
-//             console.error('Error deleting product:', err);
-//             return res.status(500).json({ error: 'Failed to delete product' });
-//         }
+// Route to get all products the user is currently bidding on
+app.get('/user-bids/:uid', (req, res) => {
+    const userId = req.params.uid;
 
-//         if (result.affectedRows > 0) {
-//             res.status(200).json({ message: `Product deleted successfully` });
-//         } else {
-//             res.status(404).json({ message: `Product not found` });
-//         }
-//     });
-// });
+    const query = `
+    SELECT DISTINCT ap.*
+    FROM add_products ap
+    JOIN user_biddings b ON ap.product_id = b.pid
+    WHERE b.uid = ?
+      AND NOW() >= ap.submitted
+      AND NOW() <= DATE_ADD(ap.submitted, INTERVAL ap.days DAY)
+  `;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+// Route to get all products the user has participated in bidding
+app.get('/user-participated-bids/:uid', (req, res) => {
+    const userId = req.params.uid;
+
+    const query = `
+    SELECT DISTINCT ap.*
+    FROM add_products ap
+    INNER JOIN user_biddings b ON ap.product_id = b.pid
+    WHERE b.uid = ?
+      AND NOW() > DATE_ADD(ap.submitted, INTERVAL ap.days DAY)
+  `;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+
+app.get('/successfulBid/:uid', (req, res) => {
+    const userId = req.params.uid;
+
+    const query = `
+    SELECT DISTINCT ap.*, b.amount AS user_bid
+    FROM add_products ap
+    INNER JOIN user_biddings b ON ap.product_id = b.pid
+    WHERE b.uid = ?
+      AND ap.uid = b.uid
+      AND NOW() > DATE_ADD(ap.submitted, INTERVAL ap.days DAY)
+      AND b.amount = (
+        SELECT MAX(b2.amount)
+        FROM user_biddings b2
+        WHERE b2.pid = ap.product_id
+      );
+  `;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('DB error:', err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(results);
+    });
+});
+
+
+const transactions = [];
+
+// POST endpoint to handle transaction submission
+app.post('/submitTransaction', (req, res) => {
+    const { payment_id, tuid } = req.body;
+
+    const query = 'UPDATE add_products SET payment_id=? WHERE tuid = ?';
+
+    db.query(query, [payment_id, tuid], (err, results) => {
+        if (err) {
+            console.error('DB error:', err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(200);
+    });
+});
+
+
+// admin sends mail to all user 
+const mailsdata = require('multer');
+const attach = multer({ storage: multer.memoryStorage() });
+
+app.post('/sendAmail', attach.array('attachments'), async (req, res) => {
+    try {
+        const { to, subject, body } = req.body;
+        const toRecipients = JSON.parse(to);
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'myproject.gk01@gmail.com',
+                pass: 'mjcy okrc vidj amcj'
+            },
+        });
+
+        const attachments = req.files.map((file) => ({
+            filename: file.originalname,
+            content: file.buffer,
+        }));
+
+        const mailOptions = {
+            from: 'your_email@gmail.com',
+            to: toRecipients.join(', '),
+            subject,
+            text: body,
+            attachments,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.json({ success: true, message: 'Email sent successfully!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to send email', error: error.message });
+    }
+});
 
 app.listen(3000, () => {
     console.log('Server listening at port 3000');

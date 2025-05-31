@@ -122,7 +122,7 @@ function Admindash() {
                                 }`}
                             onClick={() => handleButtonClick('recipt')}
                         >
-                            <i className="fa-regular fa-clipboard mx-2"></i> <span className="hidden lg:inline">Payment Recipt</span>
+                            <i className="fa-regular fa-clipboard mx-2"></i> <span className="hidden lg:inline">Checkout Recipt</span>
                         </button>
                         <button
                             className={`flex items-center px-4 w-full py-2 border border-gray-200 rounded-sm cursor-pointer shadow-md ${activeSection === 'reviews' ? 'bg-gray-600 text-white' : ''
@@ -314,7 +314,7 @@ function Admindash() {
                             id="sendmail"
                             className={`h-[600px] w-full overflow-y-scroll ${activeSection === 'sendmail' ? 'block' : 'hidden'
                                 }`} >
-                            {/* <Sendmail /> */}
+                            <Sendmail />
                         </div>
                     </div>
                 </div>

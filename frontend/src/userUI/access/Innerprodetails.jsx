@@ -18,9 +18,7 @@ function Innerprodetails() {
         const fetchProduct = async () => {
 
             try {
-                const response = await fetch(`http://localhost:3000/productDetails/${productId}`, {
-                    method: 'POST',
-                });
+                const response = await axios.get(`http://localhost:3000/productDetails/${productId}`);
 
                 if (response.ok) {
                     const data = await response.json();

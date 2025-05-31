@@ -7,6 +7,23 @@ function Items() {
     const [activeSection, setActiveSection] = useState('records');
     const [profilePicSrc, setProfilePicSrc] = useState(user);
     const inputFileRef = useRef(null);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [previousImages, setPreviousImages] = useState([]);
+
+    const [product, setProduct] = useState([]);
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/allitems');
+                setProduct(response.data);
+            } catch (err) {
+                alert('Error fetching products:', err);
+            }
+        };
+
+        fetchProduct();
+    }, []);
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -19,9 +36,13 @@ function Items() {
         inputFileRef.current.click();
     };
 
-    const handleButtonClick = (sectionId) => {
+    const handleButtonClick = (sectionId, data = null) => {
         setActiveSection(sectionId);
+        if (sectionId === 'edit') {
+            setSelectedProduct(data);
+        }
     };
+
 
     const [errors, setErrors] = useState({});
     const [formData, setFormData] = useState({
@@ -34,12 +55,26 @@ function Items() {
         description: '',
     });
 
+    const [newImagePreviews, setNewImagePreviews] = useState([]);
     const handleInputChange = (e) => {
         const { name, value, type, files } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'file' ? files : value,
-        });
+
+        if (name === 'proImage' && type === 'file') {
+            setFormData({
+                ...formData,
+                [name]: files,
+            });
+
+            const imageUrls = Array.from(files).map(file => URL.createObjectURL(file));
+            setNewImagePreviews(imageUrls);
+            setPreviousImages([]);
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value,
+            });
+        }
+
         setErrors({ ...errors, [name]: '' });
     };
 
@@ -109,20 +144,25 @@ function Items() {
         return isValid;
     };
 
-    const [product, setProduct] = useState([]);
+    const handleEditClick = (product) => {
+        setSelectedProduct(product);
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                const response = await axios.get('http://localhost:3000/allitems');
-                setProduct(response.data);
-            } catch (err) {
-                alert('Error fetching products:', err);
-            }
-        };
+        const parsedImages = product.proImage ? JSON.parse(product.proImage) : [];
 
-        fetchProduct();
-    }, []);
+        setPreviousImages(parsedImages);
+
+        setFormData({
+            proName: product.productName || '',
+            otherName: product.otherName || '',
+            price: product.price || '',
+            proImage: [],
+            type: product.type ? product.type.toLowerCase() : '',
+            days: product.days || '',
+            description: product.description || '',
+        });
+
+        setActiveSection('edit');
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -210,7 +250,7 @@ function Items() {
                                 <td className="py-3 px-6 text-left">{data.days}</td>
                                 <td className="py-3 px-6 text-center">
                                     <div className="flex item-center justify-center">
-                                        <button className="w-4 mr-2 transform hover:text-blue-500 hover:scale-110" onClick={() => handleButtonClick('edit')}>
+                                        <button className="w-4 mr-2 transform hover:text-blue-500 hover:scale-110" onClick={() => handleEditClick(data)}>
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
@@ -230,147 +270,195 @@ function Items() {
             <div id="edit" className={`p-2 ${activeSection === 'edit' ? 'block' : 'hidden'
                 }`}
             >
-                <form id="registrationForm" className="p-2" onSubmit={handleSubmit}>
-                    <div className="cursor-pointer flex justify-end" onClick={() => handleButtonClick('records')}>
-                        <i className="fa-solid fa-circle-xmark text-[20px] text-red-600"></i>
-                    </div>
-                    <div className="mb-4">
-                        <p className="flex text-center w-full items-center justify-center py-2 text-xl">
-                            Update Your Product
-                        </p>
-                        <label htmlFor="proName" className="block text-sm font-medium">
-                            Product Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="proName"
-                            name="proName"
-                            value={formData.proName}
-                            onChange={handleInputChange}
-                            placeholder="Enter your product name"
-                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
-                        />
-                        {errors.proName && (
-                            <p className="mt-1 text-sm text-red-500">{errors.proName}</p>
+                {selectedProduct && (
+                    <form id="registrationForm" className="p-2" onSubmit={handleSubmit}>
+                        <div className="cursor-pointer flex justify-end" onClick={() => handleButtonClick('records')}>
+                            <i className="fa-solid fa-circle-xmark text-[20px] text-red-600"></i>
+                        </div>
+
+                        <div className="mb-4">
+                            <p className="flex text-center w-full items-center justify-center py-2 text-xl">
+                                Update Your Product
+                            </p>
+                            <label htmlFor="proName" className="block text-sm font-medium">
+                                Product Name <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="proName"
+                                name="proName"
+                                value={formData.proName}
+                                onChange={handleInputChange}
+                                placeholder="Enter your product name"
+                                className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
+                            />
+                            {errors.proName && (
+                                <p className="mt-1 text-sm text-red-500">{errors.proName}</p>
+                            )}
+                        </div>
+
+                        <div className="mb-4">
+                            <label htmlFor="otherName" className="block text-sm font-medium">
+                                Brand/Nickname <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="otherName"
+                                name="otherName"
+                                value={formData.otherName}
+                                onChange={handleInputChange}
+                                placeholder="Enter brand or any other name"
+                                className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
+                            />
+                            {errors.otherName && (
+                                <p className="mt-1 text-sm text-red-500">{errors.otherName}</p>
+                            )}
+                        </div>
+
+                        <div className="mb-4">
+                            <label htmlFor="price" className="block text-sm font-medium">
+                                Product Price <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="price"
+                                name="price"
+                                value={formData.price}
+                                onChange={handleInputChange}
+                                placeholder="Enter product price"
+                                className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
+                            />
+                            {errors.price && (
+                                <p className="mt-1 text-sm text-red-500">{errors.price}</p>
+                            )}
+                        </div>
+
+                        <div className="mb-4">
+                            <label htmlFor="proImage" className="block text-sm font-medium">
+                                Product Images <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="file"
+                                id="proImage"
+                                name="proImage"
+                                accept="image/jpeg, image/jpg, image/png"
+                                multiple
+                                onChange={handleInputChange}
+                                className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
+                            />
+                            {errors.proImage && (
+                                <p className="mt-1 text-sm text-red-500">{errors.proImage}</p>
+                            )}
+                        </div>
+                        {previousImages.length > 0 && (
+                            <div className="mb-2">
+                                <p className="text-sm italic text-gray-500 mb-1">Previously uploaded images:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {previousImages.map((imgName, index) => (
+                                        <img
+                                            key={index}
+                                            src={`http://localhost:3000/productImage/${imgName}`}
+                                            alt={`Previous Upload ${index + 1}`}
+                                            className="h-16 w-16 object-cover rounded border"
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         )}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="otherName" className="block text-sm font-medium">
-                            Brand/Nickname <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="otherName"
-                            name="otherName"
-                            value={formData.otherName}
-                            onChange={handleInputChange}
-                            placeholder="Enter brand or any other name"
-                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
-                        />
-                        {errors.otherName && (
-                            <p className="mt-1 text-sm text-red-500">{errors.otherName}</p>
+
+                        {newImagePreviews.length > 0 && (
+                            <div className="mb-2">
+                                <p className="text-sm italic text-gray-500 mb-1">Newly selected images:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {newImagePreviews.map((src, index) => (
+                                        <img
+                                            key={index}
+                                            src={src}
+                                            alt={`New Preview ${index + 1}`}
+                                            className="h-16 w-16 object-cover rounded border"
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         )}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="price" className="block text-sm font-medium">
-                            Product Price <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="price"
-                            name="price"
-                            value={formData.price}
-                            onChange={handleInputChange}
-                            placeholder="Enter product price"
-                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
-                        />
-                        {errors.price && (
-                            <p className="mt-1 text-sm text-red-500">{errors.price}</p>
+
+
+                        {formData.type !== undefined && (
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium" htmlFor="type">
+                                    Product Type <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    name="type"
+                                    id="type"
+                                    value={formData.type}
+                                    onChange={handleInputChange}
+                                    className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
+                                >
+                                    <option value="">-Choose Categories-</option>
+                                    <option value="electronics">Electronics</option>
+                                    <option value="communication">Communication</option>
+                                    <option value="transport">Transport</option>
+                                    <option value="antique">Antique</option>
+                                    <option value="softwares">Softwares</option>
+                                    <option value="artifacts">Artifacts</option>
+                                    <option value="clothing">Clothing</option>
+                                    <option value="sculpture">Sculpture</option>
+                                </select>
+                                {errors.type && (
+                                    <p className="mt-1 text-sm text-red-500">{errors.type}</p>
+                                )}
+                            </div>
                         )}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="proImage" className="block text-sm font-medium">
-                            Product Images <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="file"
-                            id="proImage"
-                            name="proImage"
-                            accept="image/jpeg, image/jpg, image/png"
-                            multiple
-                            onChange={handleInputChange}
-                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
-                        />
-                        {errors.proImage && (
-                            <p className="mt-1 text-sm text-red-500">{errors.proImage}</p>
-                        )}
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium" htmlFor="type">
-                            Product Type <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            name="type"
-                            id="type"
-                            value={formData.type}
-                            onChange={handleInputChange}
-                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
-                        >
-                            <option value="">-Choose Categories-</option>
-                            <option value="eletronics">Electronics</option>
-                            <option value="communication">Communication</option>
-                            <option value="transport">Transport</option>
-                            <option value="antique">Antique</option>
-                            <option value="softwares">Softwares</option>
-                            <option value="artifacts">Artifacts</option>
-                            <option value="clothing">Clothing</option>
-                            <option value="sclupture">Sclupture</option>
-                        </select>
-                        {errors.type && (
-                            <p className="mt-1 text-sm text-red-500">{errors.type}</p>
-                        )}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="days" className="block text-sm font-medium">
-                            No. Of Days <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="days"
-                            name="days"
-                            value={formData.days}
-                            onChange={handleInputChange}
-                            placeholder="Enter total days for bidding placement"
-                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
-                        />
-                        {errors.days && (
-                            <p className="mt-1 text-sm text-red-500">{errors.days}</p>
-                        )}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="description" className="block text-sm font-medium">
-                            Product Details <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            rows="5"
-                            placeholder="Enter item details"
-                            className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100 resize-none"
-                        ></textarea>
-                        {errors.description && (
-                            <p className="mt-1 text-sm text-red-500">{errors.description}</p>
-                        )}
-                    </div>
-                    <div className="w-full flex justify-end">
-                        <button
-                            type="submit"
-                            className="px-2 py-1 border border-gray-200 shadow-md bg-black text-white cursor-pointer rounded"
-                        >
-                            Submit
-                        </button>
-                    </div>
-                </form>
+
+
+                        <div className="mb-4">
+                            <label htmlFor="days" className="block text-sm font-medium">
+                                No. Of Days <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="days"
+                                name="days"
+                                value={formData.days}
+                                onChange={handleInputChange}
+                                placeholder="Enter total days for bidding placement"
+                                className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
+                            />
+                            {errors.days && (
+                                <p className="mt-1 text-sm text-red-500">{errors.days}</p>
+                            )}
+                        </div>
+
+                        <div className="mb-4">
+                            <label htmlFor="description" className="block text-sm font-medium">
+                                Product Details <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                id="description"
+                                name="description"
+                                rows="5"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                placeholder="Enter item details"
+                                className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100 resize-none"
+                            />
+                            {errors.description && (
+                                <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+                            )}
+                        </div>
+
+                        <div className="w-full flex justify-end">
+                            <button
+                                type="submit"
+                                className="px-2 py-1 border border-gray-200 shadow-md bg-black text-white cursor-pointer rounded"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+                )}
+
             </div>
         </>
     )

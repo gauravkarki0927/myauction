@@ -54,7 +54,7 @@ function Outersearch() {
     const productDetails = (PID) => {
         navigate(`/product?pid=${PID}`);
 
-    };   
+    };
 
     return (
         <>
@@ -110,6 +110,9 @@ function Outersearch() {
 
                                         const formatted = `${month}-${day}-${year}, ${hours}:${minutes} ${ampm}`;
 
+                                        if (endDate < new Date()) {
+                                            return <p className="text-red-800 text-[13px] font-semibold">Auction Ended</p>;
+                                        }
                                         return <p className="text-red-800 text-[13px]">Ends at {formatted}</p>;
                                     })()}
                                     <div className="flex items-center justify-between">

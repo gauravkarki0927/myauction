@@ -27,7 +27,7 @@ function Navigation() {
             );
 
             if (response.status === 200) {
-                navigate('/isearch', { state: { searchItem: search.searchItem } });
+                navigate('/access/isearch', { state: { searchItem: search.searchItem } });
             } else {
                 alert('Error searching product: ' + response.statusText);
             }

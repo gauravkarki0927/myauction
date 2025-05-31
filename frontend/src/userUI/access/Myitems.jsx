@@ -8,7 +8,7 @@ import pic11 from '../../pictures/shoes2.jpg';
 
 function Myitems() {
   const [activeSection, setActiveSection] = useState('create');
-  const [user_id, setUser_id] = useState([]);
+  const [user_id, setUser_id] = useState(null);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -186,6 +186,61 @@ function Myitems() {
     }
   };
 
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    if (!user_id) return;
+
+    axios.get(`http://localhost:3000/userproducts/${user_id}`)
+      .then(res => setProducts(res.data))
+      .catch(err => console.error(err));
+  }, [user_id]);
+
+  const deleteProduct = async (productId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this product?");
+    if (!confirmDelete) return;
+
+    try {
+      const response = await axios.delete(`http://localhost:3000/deleteproduct/${productId}`);
+
+      if (response.status === 200) {
+        alert('Product deleted successfully!');
+        setProducts(products.filter(item => item.product_id !== productId));
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Failed to delete product.');
+    }
+  };
+
+  const [biddedProducts, setBiddedProducts] = useState([]);
+
+  useEffect(() => {
+    if (user_id) {
+      axios.get(`http://localhost:3000/user-bids/${user_id}`)
+        .then(res => setBiddedProducts(res.data))
+        .catch(err => console.error(err));
+    }
+  }, [user_id]);
+  console.log(biddedProducts);
+
+  const [participatedProducts, setParticipatedProducts] = useState([]);
+
+  useEffect(() => {
+    if (user_id) {
+      axios.get(`http://localhost:3000/user-participated-bids/${user_id}`)
+        .then(res => setParticipatedProducts(res.data))
+        .catch(err => console.error(err));
+    }
+  }, [user_id]);
+
+  const productDetails = (PID) => {
+    if (user_id) {
+      navigate(`/access/innerproduct?pid=${PID}`);
+    } else {
+      navigate(`/product?pid=${PID}`);
+    }
+  };
 
   return (
     <>
@@ -405,29 +460,70 @@ function Myitems() {
             className={`h-auto w-full ${activeSection === 'myitems' ? 'block' : 'hidden'
               }`}
           >
-            <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
-              <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
-                <div className="relative">
-                  <a href="/product">
-                    <img className="w-full" src={pic2} alt="Product Image" />
-                    <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
-                      Available
+            <div className="flex flex-col gap-2 py-4" id="product">
+              <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
+                {products.map(data => (
+                  <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]" key={data.product_id}>
+                    <div className="relative">
+                      <div className="cursor-pointer">
+                        {JSON.parse(data.proImage)[0] && (
+                          <img
+                            className="w-full"
+                            src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
+                            alt="Product Image"
+                            onClick={() => productDetails(data.product_id)}
+                          />
+                        )}
+                        <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
+                          Available
+                        </div>
+                      </div>
                     </div>
-                  </a>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-medium mb-1">Product Title</h3>
-                  <p className="text-gray-800 text-sm mb-4">
-                    Product Type
-                  </p>
-                  <p className="text-red-800 text-[13px]">Ends at 03-22-2025, 10:00 AM</p>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-lg">$19.99</span>
-                    <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer">
-                      <a href="/product">Bid Now</a>
-                    </button>
+                    <div className="p-4">
+                      <h3 className="text-lg font-medium mb-1">{data.productName}</h3>
+                      <p className="text-gray-800 text-sm mb-4">
+                        {data.type}
+                      </p>
+                      {(() => {
+                        const postDate = new Date(data.submitted);
+                        const durationInDays = data.days || 0;
+
+                        if (isNaN(postDate.getTime())) {
+                          return <p className="text-red-800 text-[13px]">Invalid date</p>;
+                        }
+
+                        const endDate = new Date(postDate);
+                        endDate.setDate(endDate.getDate() + durationInDays);
+
+                        const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(endDate.getDate()).padStart(2, '0');
+                        const year = endDate.getFullYear();
+                        let hours = endDate.getHours();
+                        const minutes = String(endDate.getMinutes()).padStart(2, '0');
+                        const ampm = hours >= 12 ? 'PM' : 'AM';
+                        hours = hours % 12 || 12;
+
+                        const formatted = `${month}-${day}-${year}, ${hours}:${minutes} ${ampm}`;
+
+                        if (endDate < new Date()) {
+                          return <p className="text-red-800 text-[13px] font-semibold">Auction Ended</p>;
+                        }
+                        return <p className="text-red-800 text-[13px]">Ends at {formatted}</p>;
+                      })()}
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-lg">Rs.{data.price}</span>
+                        <div className="flex gap-2">
+                          <button className="bg-green-800 text-gray-100 border border-gray-400 rounded-[6px] py-2 px-4 text-[13px] hover:bg-green-700 outline-none cursor-pointer" onClick={() => productDetails(data.product_id)}>
+                            Update
+                          </button>
+                          <button className="bg-red-800 text-gray-100 border border-gray-400 rounded-[6px] py-2 px-4 text-[13px] hover:bg-red-700 outline-none cursor-pointer" onClick={() => deleteProduct(data.product_id)}>
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -437,29 +533,69 @@ function Myitems() {
               }`}
           >
             <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
-              <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
-                <div className="relative">
-                  <a href="/product">
-                    <img className="w-full" src={pic2} alt="Product Image" />
-                    <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
-                      Available
+              {biddedProducts.length === 0 ? (
+                <p className="text-gray-600 text-center w-full">Currently you are not participating in any bids.</p>
+              ) : (
+                biddedProducts.map(product => (
+                  <div key={product.product_id} className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
+                    <div className="relative cursor-pointer">
+                      {JSON.parse(product.proImage)[0] && (
+                        <img
+                          className="w-full"
+                          src={`http://localhost:3000/productImage/${JSON.parse(product.proImage)[0]}`}
+                          alt="Product"
+                          onClick={() => productDetails(product.product_id)}
+                        />
+                      )}
+                      <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
+                        Available
+                      </div>
                     </div>
-                  </a>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-medium mb-1">Product Title</h3>
-                  <p className="text-gray-800 text-sm mb-4">
-                    Product Type
-                  </p>
-                  <p className="text-red-800 text-[13px]">Ends at 03-22-2025, 10:00 AM</p>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-lg">$19.99</span>
-                    <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer">
-                      <a href="/product">Bid Now</a>
-                    </button>
+                    <div className="p-4">
+                      <h3 className="text-lg font-medium mb-1">{product.productName}</h3>
+                      <p className="text-gray-800 text-sm mb-4">{product.type}</p>
+                      <p className="text-gray-800 text-sm mb-4">
+                        {product.type}
+                      </p>
+                      {(() => {
+                        const postDate = new Date(product.submitted);
+                        const durationInDays = product.days || 0;
+
+                        if (isNaN(postDate.getTime())) {
+                          return <p className="text-red-800 text-[13px]">Invalid date</p>;
+                        }
+
+                        const endDate = new Date(postDate);
+                        endDate.setDate(endDate.getDate() + durationInDays);
+
+                        const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(endDate.getDate()).padStart(2, '0');
+                        const year = endDate.getFullYear();
+                        let hours = endDate.getHours();
+                        const minutes = String(endDate.getMinutes()).padStart(2, '0');
+                        const ampm = hours >= 12 ? 'PM' : 'AM';
+                        hours = hours % 12 || 12;
+
+                        const formatted = `${month}-${day}-${year}, ${hours}:${minutes} ${ampm}`;
+
+                        if (endDate < new Date()) {
+                          return <p className="text-red-800 text-[13px] font-semibold">Auction Ended</p>;
+                        }
+                        return <p className="text-red-800 text-[13px]">Ends at {formatted}</p>;
+                      })()}
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-lg">Rs.{product.price}</span>
+                        <button
+                          className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer"
+                          onClick={() => productDetails(product.product_id)}
+                        >
+                          Bid Now
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                ))
+              )}
             </div>
           </div>
           <div
@@ -468,33 +604,64 @@ function Myitems() {
               }`}
           >
             <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
-              <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
-                <div className="relative">
-                  <a href="/product">
-                    <img className="w-full" src={pic11} alt="Product Image" />
-                    <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
-                      Available
+              {participatedProducts.length === 0 ? (
+                <p className="text-gray-600 text-center w-full">No bids placed yet.</p>
+              ) : (
+                participatedProducts.map(product => (
+                  <div key={product.product_id} className="flex flex-col bg-white rounded overflow-hidden w-[300px]">
+                    <div className="relative cursor-pointer">
+                      {JSON.parse(product.proImage)[0] && (
+                        <img
+                          className="w-full"
+                          src={`http://localhost:3000/productImage/${JSON.parse(product.proImage)[0]}`}
+                          alt="Product"
+                          onClick={() => productDetails(product.product_id)}
+                        />
+                      )}
+                      <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
+                        Participated
+                      </div>
                     </div>
-                  </a>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-medium mb-1">Product Title</h3>
-                  <p className="text-gray-800 text-sm mb-4">
-                    Product Type
-                  </p>
-                  <p className="text-red-800 text-[13px]">Ends at 03-22-2025, 10:00 AM</p>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-lg">$19.99</span>
-                    <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer">
-                      <a href="/product">Bid Now</a>
-                    </button>
+                    <div className="p-4">
+                      <h3 className="text-lg font-medium mb-1">{product.productName}</h3>
+                      <p className="text-gray-800 text-sm mb-4">{product.type}</p>
+                      {(() => {
+                        const postDate = new Date(product.submitted);
+                        const durationInDays = product.days || 0;
+
+                        if (isNaN(postDate.getTime())) {
+                          return <p className="text-red-800 text-[13px]">Invalid date</p>;
+                        }
+
+                        const endDate = new Date(postDate);
+                        endDate.setDate(endDate.getDate() + durationInDays);
+
+                        const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(endDate.getDate()).padStart(2, '0');
+                        const year = endDate.getFullYear();
+                        let hours = endDate.getHours();
+                        const minutes = String(endDate.getMinutes()).padStart(2, '0');
+                        const ampm = hours >= 12 ? 'PM' : 'AM';
+                        hours = hours % 12 || 12;
+
+                        const formatted = `${month}-${day}-${year}, ${hours}:${minutes} ${ampm}`;
+
+                        if (endDate < new Date()) {
+                          return <p className="text-red-800 text-[13px] font-semibold">Auction Ended</p>;
+                        }
+                        return <p className="text-red-800 text-[13px]">Ends at {formatted}</p>;
+                      })()}
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-lg">Rs.{product.price}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                ))
+              )}
             </div>
           </div>
         </div>
-      </div>
+      </div >
       <Footer />
     </>
   );

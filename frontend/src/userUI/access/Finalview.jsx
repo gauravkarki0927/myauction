@@ -1,7 +1,6 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { v4 as uuidv4 } from "uuid";
 import CryptoJS from "crypto-js";
 import esewa from '../../pictures/esewa_og.webp';
 import khalti from '../../pictures/khalti.jpg';
@@ -14,10 +13,10 @@ const Finalview = () => {
     const location = useLocation();
     const checkout_data = location.state;
     const [formData, setformData] = useState({
-        amount: "10",
+        amount: checkout_data.price,
         tax_amount: "0",
-        total_amount: "10",
-        transaction_uuid: uuidv4(),
+        total_amount: checkout_data.price,
+        transaction_uuid: checkout_data.tuid,
         product_service_charge: "0",
         product_delivery_charge: "0",
         product_code: "EPAYTEST",
@@ -171,7 +170,7 @@ const Finalview = () => {
                         <h3 className="text-lg font-semibold mb-3">ORDER SUMMARY</h3>
                         <div className="flex justify-between mb-1">
                             <span>Subtotal</span>
-                            <span>$37.49 CDN</span>
+                            <span>Rs. {checkout_data?.price}</span>
                         </div>
                         <div className="flex justify-between mb-1">
                             <span>Taxes</span>
@@ -184,7 +183,7 @@ const Finalview = () => {
                         <hr className="my-3" />
                         <div className="flex justify-between mt-3 mb-5">
                             <strong className="font-semibold">TOTAL</strong>
-                            <strong className="font-semibold">$37.49 CDN</strong>
+                            <strong className="font-semibold">Rs. {checkout_data?.price}</strong>
                         </div>
                         <div className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-3 flex items-center justify-center gap-4">
                             <p className="font-semibold">Click here for payment <i className="fa-solid fa-arrow-right mx-1"></i> </p>
