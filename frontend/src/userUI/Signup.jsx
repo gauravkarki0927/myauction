@@ -123,7 +123,7 @@ function Signup() {
             'Bajura',
             'Baitadi',
         ],
-    };    
+    };
 
     const handleStateChange = (e) => {
         const selectedState = e.target.value;
@@ -273,28 +273,55 @@ function Signup() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
         if (validateForm()) {
             const formDataToSend = new FormData();
             for (const key in formData) {
                 formDataToSend.append(key, formData[key]);
             }
 
-            axios
-                .post('http://localhost:3000/signup', formDataToSend, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                })
-                .then((res) => {
-                    alert('Registration Successful');
-                    navigate('/login');
+            // axios
+            //     .post('http://localhost:3000/signup', formDataToSend, {
+            //         headers: {
+            //             'Content-Type': 'multipart/form-data',
+            //         },
+            //     })
+            //     .then((res) => {
+            //         alert('Registration Successful');
+            //         navigate('/login');
+            //     })
+            //     .catch((err) => {
+            //         if (err.response) {
+            //             if (err.response.status === 409) {
+            //                 alert('A user with this email already exists.');
+            //             } else {
+            //                 alert(`Registration failed: ${err.response.data.error || 'Please try again.'}`);
+            //             }
+            //         } else {
+            //             alert('Registration failed. Please check your connection and try again.');
+            //         }
+
+            //         console.error('Registration error:', err);
+            //     });
+
+            localStorage.setItem('pendingSignupEmail', formData.email);
+
+            axios.post('http://localhost:3000/pre-signup', formDataToSend)
+                .then(() => {
+                    alert("Verification code sent to your email.");
+                    navigate('/verifyemail');
                 })
                 .catch((err) => {
-                    alert('Registration failed. Please try again.');
-                    console.log(err);
+                    if (err.response?.status === 409) {
+                        alert("User with this email already exists.");
+                    } else {
+                        alert("Failed to send verification email.");
+                    }
                 });
+
         }
     };
+
 
     return (
         <>

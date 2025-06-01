@@ -29,6 +29,7 @@ import Innerprodetails from './userUI/access/Innerprodetails';
 import Ifilter from './userUI/access/Ifilter';
 import Forgetpass from './userUI/Forgetpass';
 import UpdateProduct from './userUI/access/UpdateProduct';
+import Verifyemail from './userUI/Verifyemail';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <Route path="/usernav" element={<Usernav />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/verifyemail" element={<Verifyemail />} />
         <Route path="/forget" element={<Forgetpass />} />
         {/* <Route path="/otp" element={<OTP />} /> */}
         {/* <Route path="/reset" element={<Resetpass />} /> */}

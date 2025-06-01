@@ -80,21 +80,120 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post('/signup', upload.single('profileImage'), async (req, res) => {
+// app.post('/signup', upload.single('profileImage'), async (req, res) => {
+//   const { name, email, password, phone, dob, country, state, district, street } = req.body;
+
+//   try {
+//     const emailCheckQuery = "SELECT * FROM user_signup WHERE user_email = ?";
+//     db.query(emailCheckQuery, [email], async (err, result) => {
+//       if (err) {
+//         return res.status(500).json({ error: "Database error during email check" });
+//       }
+
+//       if (result.length > 0) {
+//         return res.status(409).json({ error: "User with this email already exists" });
+//       }
+
+//       const hashedPassword = await bcrypt.hash(password, 10);
+//       const imagePath = req.file ? req.file.filename : null;
+
+//       const insertQuery = `
+//         INSERT INTO user_signup(
+//           user_name, user_email, user_pass, user_phone,
+//           date_of_birth, user_profile, user_ctry, user_state,
+//           user_district, user_street
+//         ) VALUES (?)`;
+
+//       const values = [
+//         name, email, hashedPassword, phone, dob,
+//         imagePath, country, state, district, street
+//       ];
+
+//       db.query(insertQuery, [values], (err, data) => {
+//         if (err) {
+//           return res.status(500).json({ error: "Error inserting user into database" });
+//         }
+//         return res.status(201).json({ message: "User registered successfully", userId: data.insertId });
+//       });
+//     });
+
+//   } catch (error) {
+//     return res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+const tempUsers = {}; // Use Redis in production
+
+// Step 1: Handle pre-signup and send OTP
+app.post('/pre-signup', upload.single('profileImage'), async (req, res) => {
     const { name, email, password, phone, dob, country, state, district, street } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const imagePath = req.file ? req.file.filename : null;
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const profileImage = req.file ? req.file.filename : null;
 
-    const sql = "INSERT INTO user_signup(`user_name`,`user_email`,`user_pass`,`user_phone`,`date_of_birth`, `user_profile`,`user_ctry`,`user_state`,`user_district`,`user_street`) VALUES(?)";
-    const values = [name, email, hashedPassword, phone, dob, imagePath, country, state, district, street];
+    // Store in memory
+    tempUsers[email] = {
+        name, email, password: hashedPassword, phone, dob,
+        country, state, district, street, profileImage, otp,
+        timestamp: Date.now()
+    };
 
-    db.query(sql, [values], (err, data) => {
-        if (err) {
-            return res.status(500).json({ err: 'Database error' });
+    // Send email
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'myproject.gk01@gmail.com',
+            pass: 'mjcy okrc vidj amcj'
         }
-        return res.status(201).json(data);
+    });
+
+    const mailOptions = {
+        from: 'myproject.gk01@gmail.com',
+        to: email,
+        subject: 'Verify Your Email',
+        text: '',
+        html: `
+        <div className="p-4">
+        <p>Your verification code for account registration is <strong>${otp}</strong><br>
+        Please do not share this message with anyone<br>
+        Thank you for your time<br>
+        Online Auction System</p?
+        </div>`
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+        if (err) return res.status(500).json({ error: 'Email sending failed' });
+        res.status(200).json({ message: 'Verification code sent' });
     });
 });
+
+// Step 2: Handle OTP verification and final DB insert
+app.post('/verify-otp', (req, res) => {
+    const { email, otp } = req.body;
+    const user = tempUsers[email];
+
+    if (!user || user.otp !== otp) {
+        return res.status(400).json({ error: 'Invalid or expired code' });
+    }
+
+    const sql = `
+    INSERT INTO user_signup
+    (user_name, user_email, user_pass, user_phone, date_of_birth, user_profile, user_ctry, user_state, user_district, user_street)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    const values = [
+        user.name, user.email, user.password, user.phone, user.dob,
+        user.profileImage, user.country, user.state, user.district, user.street
+    ];
+
+    db.query(sql, values, (err, result) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+
+        delete tempUsers[email]; // Clean up
+        res.status(201).json({ message: 'User registered successfully' });
+    });
+});
+
 
 // login route to handle user login
 const jwt = require('jsonwebtoken');
@@ -843,6 +942,67 @@ app.post('/submitTransaction', (req, res) => {
     });
 });
 
+// route to submit user reviews 
+app.post('/reviews', (req, res) => {
+    const { user_id, user_name, user_profile, review } = req.body;
+
+    if (!user_id || !user_name || !review) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const sql = `
+    INSERT INTO user_review (uid, user_name, profile, review)
+    VALUES (?, ?, ?, ?)
+  `;
+
+    db.query(sql, [user_id, user_name, user_profile, review], (err, result) => {
+        if (err) {
+            console.error('Error inserting review:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        res.status(200).json({ message: 'Review submitted successfully' });
+    });
+});
+
+// route to fetch all user reviews
+app.get('/getReviews', (req, res) => {
+    const sql = `
+        SELECT *
+        FROM user_review
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Failed to fetch results' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// route to update the user review 
+app.put('/updateReview/:rid', (req, res) => {
+    const { rid } = req.params;
+    const { review } = req.body;
+
+    const sql = 'UPDATE user_review SET review = ? WHERE rid = ?';
+    db.query(sql, [review, rid], (err, result) => {
+        if (err) return res.status(500).send('Error updating review');
+        res.status(200).send('Review updated');
+    });
+});
+
+// route to delete the user review 
+app.delete('/deleteReview/:rid', (req, res) => {
+    const { rid } = req.params;
+
+    const sql = 'DELETE FROM user_review WHERE rid = ?';
+    db.query(sql, [rid], (err, result) => {
+        if (err) return res.status(500).send('Error deleting review');
+        res.status(200).send('Review deleted');
+    });
+});
 
 
 // admin sends mail to all user 
