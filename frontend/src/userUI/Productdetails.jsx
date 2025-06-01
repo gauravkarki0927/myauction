@@ -16,28 +16,29 @@ function Productdetails() {
 
     useEffect(() => {
         const fetchProduct = async () => {
-
             try {
                 const response = await fetch(`http://localhost:3000/productDetails/${productId}`, {
-                    method: 'POST',
+                    method: 'GET'
                 });
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log(data);
-
                     const productData = data[0];
                     setProduct(productData);
 
                     try {
-                        const parsedImages = JSON.parse(productData.proImage);
+                        const parsedImages = JSON.parse(productData.proImage || '[]');
                         setImages(parsedImages);
 
-                        const initialImage = `http://localhost:3000/productImage/${parsedImages[0]}`;
-                        setMainImageSrc(initialImage);
+                        if (parsedImages.length > 0) {
+                            const initialImage = `http://localhost:3000/productImage/${parsedImages[0]}`;
+                            setMainImageSrc(initialImage);
+                        }
                     } catch (err) {
                         console.error("Invalid JSON in proImage", err);
                     }
+                } else {
+                    console.error("Server error", response.status);
                 }
             } catch (err) {
                 console.error("Error fetching product:", err);
@@ -45,9 +46,10 @@ function Productdetails() {
             }
         };
 
-        fetchProduct();
-    }, [searchParams]);
-
+        if (productId) {
+            fetchProduct();
+        }
+    }, [productId]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -120,7 +122,7 @@ function Productdetails() {
         else if (!/^\d+$/.test(value)) {
             setErrorMessage("Please enter a valid number.");
         }
-        else if (parseInt(value, 10) <= highestBid.highBid+20) {
+        else if (parseInt(value, 10) <= highestBid.highBid + 20) {
             setErrorMessage("Please enter 20 higher than amount.");
         }
         else {

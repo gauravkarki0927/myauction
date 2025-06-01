@@ -8,7 +8,7 @@ function Approve() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/allitems');
+                const response = await axios.get('http://localhost:3000/approveProduct');
                 setProduct(response.data);
             } catch (err) {
                 alert('Error fetching products:', err);
@@ -23,7 +23,7 @@ function Approve() {
         if (smt) {
             try {
                 const response = await fetch(`http://localhost:3000/approvePro/${proID}`, {
-                    method: 'POST',
+                    method: 'PUT',
                 });
 
                 if (response.ok) {
@@ -31,19 +31,20 @@ function Approve() {
                     alert(data.message);
                 } else {
                     const errorData = await response.json();
-                    alert('Error approving post:', errorData.error || errorData.message);
+                    alert('Error approving post: ' + (errorData.error || errorData.message));
                 }
             } catch (error) {
-                alert('Network error:', error);
+                alert('Network error: ' + error.message);
             }
         }
     };
 
+
     const handleDeleteClick = async (proID) => {
-        const smt = confirm("Are you sure you want to delete this user?");
+        const smt = confirm("Are you sure you want to delete this request?");
         if (smt) {
             try {
-                const response = await fetch(`http://localhost:3000/deletepro/${proID}`, {
+                const response = await fetch(`http://localhost:3000/deleteApprove/${proID}`, {
                     method: 'DELETE',
                 });
 
@@ -98,10 +99,7 @@ function Approve() {
                             <td className="py-3 px-6 text-left">{data.submitted}</td>
                             <td className="py-3 px-6 text-left">{data.days}</td>
                             <td className="py-3 px-6 text-center">
-                                <div className="flex item-center justify-center">
-                                    <button className="w-4 mr-2 transform hover:text-blue-500 hover:scale-110">
-                                        <i className="fa-regular fa-eye text-yellow-500"></i>
-                                    </button>
+                                <div className="flex item-center gap-4 justify-center">
                                     <button className="w-4 mr-2 transform hover:text-blue-500 hover:scale-110" onClick={() => handleApproveClick(data.product_id)}>
                                         <i className="fa-solid fa-check text-green-500"></i>
                                     </button>

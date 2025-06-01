@@ -28,6 +28,7 @@ import Admindash from './adminUI/Admindash';
 import Innerprodetails from './userUI/access/Innerprodetails';
 import Ifilter from './userUI/access/Ifilter';
 import Forgetpass from './userUI/Forgetpass';
+import UpdateProduct from './userUI/access/UpdateProduct';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
         <Route path="/access/innerproduct" element={<Innerprodetails />} />
         <Route path="/access/userdash" element={<Userdash />} />
         <Route path="/access/ifilter" element={<Ifilter />} />
+        <Route path="/access/updateProduct" element={<UpdateProduct />} />
         <Route path="/access/myitems" element={<Myitems />} />
         <Route path="/access/givereview" element={<Givereviews />} />
         <Route path="/access/reviewbox" element={<Reviewbox />} />

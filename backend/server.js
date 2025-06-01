@@ -257,15 +257,91 @@ app.post('/additems', productPath.array('proImage', 4), async (req, res) => {
     });
 });
 
+// Multer setup for handling file uploads
+const produpdateProducts = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'productImage/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const productImg = multer({ storage: produpdateProducts });
+
+// Route to handle product update request 
+app.post('/updateProduct', productImg.array('proImage', 4), (req, res) => {
+
+    const {
+        pid,
+        proName,
+        otherName,
+        price,
+        type,
+        days,
+        description,
+        keypoints,
+    } = req.body;
+
+    const imageFilenames = req.files?.map(file => file.filename) || [];
+
+    const sql = `INSERT INTO add_products (productName, otherName, price, proImage, type, days, description, keyPoints, update_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const values = [proName, otherName, price, JSON.stringify(imageFilenames), type, days, description, keypoints, pid];
+
+    db.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Insert error:', err);
+            return res.status(500).json({ message: 'Error submitting product data' });
+        }
+
+        res.status(201).json({ message: 'Product submitted successfully', productId: result.insertId });
+    });
+});
+
+// route to fetch all products to approve 
+app.get('/approveProduct', (req, res) => {
+    const sql = `
+        SELECT *
+        FROM add_products
+        WHERE DATE_ADD(submitted, INTERVAL days DAY) > NOW() AND approve = ''
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Failed to fetch results' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// route to delete the approve request 
+app.delete('/approveProduct/"id', (req, res) => {
+    const proId = req.params.id;
+    const sql = `
+        DELETE
+        FROM add_products
+        WHERE product_id = ?
+    `;
+
+    db.query(sql, [proId], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Failed to fetch results' });
+        }
+        res.status(200).json({ message: 'Product deleted successfully' });
+    });
+});
+
 // route to approve product before display
-app.delete('/approvePro/:id', (req, res) => {
+app.put('/approvePro/:id', (req, res) => {
     const proId = req.params.id;
 
-    if (!Number.isInteger(parseInt(userId))) {
+    if (!Number.isInteger(parseInt(proId))) {
         return res.status(400).json({ error: 'Invalid product ID' });
     }
 
-    const sql = 'UPDATE user_signup SET `approve`=1 WHERE User_id = ?';
+    const sql = 'UPDATE add_products SET `approve`=1 WHERE product_id = ?';
 
     db.query(sql, [proId], (err, result) => {
         if (err) {
@@ -274,28 +350,142 @@ app.delete('/approvePro/:id', (req, res) => {
         }
 
         if (result.affectedRows > 0) {
-            res.status(200).json({ message: `The items has been approved` });
+            res.status(200).json({ message: 'The item has been approved' });
         } else {
-            res.status(404).json({ message: `Approve failed` });
+            res.status(404).json({ message: 'Approve failed: Product not found' });
         }
     });
 });
 
+
+
 // route to fetch all products
 app.get('/allitems', (req, res) => {
-    const sql = "SELECT * FROM add_products";
+    const sql = `
+        SELECT *
+        FROM add_products
+        WHERE DATE_ADD(submitted, INTERVAL days DAY) > NOW() AND update_id = '' AND approve = 1
+    `;
 
     db.query(sql, (err, results) => {
         if (err) {
-            return res.status(500).json({ error: 'Failed to fetch result' });
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Failed to fetch results' });
         }
         res.status(200).json(results);
+    });
+});
 
+// route to fetch all the update request 
+app.get('/updateItems', (req, res) => {
+    const sql = `
+        SELECT *
+        FROM add_products
+        WHERE DATE_ADD(submitted, INTERVAL days DAY) > NOW() AND update_id != ''
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Failed to fetch results' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// route to update the product details by admin 
+app.put('/approveUpdate/:id', (req, res) => {
+    const update_id = parseInt(req.params.id);
+
+    if (!Number.isInteger(update_id)) {
+        return res.status(400).json({ error: 'Invalid product ID' });
+    }
+
+    const selectQuery = 'SELECT * FROM add_products WHERE update_id = ?';
+
+    db.query(selectQuery, [update_id], (err, results) => {
+        if (err) {
+            console.error('Error fetching update:', err);
+            return res.status(500).json({ error: 'Failed to fetch update' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'No update request found' });
+        }
+
+        const updateData = results[0];
+
+        const {
+            productName,
+            otherName,
+            price,
+            proImage,
+            type,
+            days,
+            description,
+            keyPoints
+        } = updateData;
+
+        const imageFilenames = req.files?.map(file => file.filename) || JSON.parse(proImage);
+
+        const updateOriginalQuery = `
+            UPDATE add_products
+            SET productName = ?, otherName = ?, price = ?, proImage = ?, type = ?, days = ?, description = ?, keyPoints = ?
+            WHERE product_id = ?
+        `;
+
+        const values = [
+            productName,
+            otherName,
+            price,
+            JSON.stringify(imageFilenames),
+            type,
+            days,
+            description,
+            keyPoints,
+            update_id
+        ];
+
+        db.query(updateOriginalQuery, values, (err, updateResult) => {
+            if (err) {
+                console.error('Error updating product:', err);
+                return res.status(500).json({ error: 'Failed to update product' });
+            }
+
+            const deleteQuery = 'DELETE FROM add_products WHERE update_id = ?';
+
+            db.query(deleteQuery, [update_id], (err, deleteResult) => {
+                if (err) {
+                    console.error('Error deleting update request:', err);
+                    return res.status(500).json({ error: 'Update approved, but cleanup failed' });
+                }
+
+                res.status(200).json({ message: 'Update approved and applied successfully' });
+            });
+        });
+    });
+});
+
+// route to delete the approve request 
+app.delete('/deleteUpdate/"id', (req, res) => {
+    const UID = req.params.id;
+    const sql = `
+        DELETE
+        FROM add_products
+        WHERE update_id = ?
+    `;
+
+    db.query(sql, [UID], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Failed to fetch results' });
+        }
+        res.status(200).json({ message: 'Product deleted successfully' });
     });
 });
 
 // route to get product details
-app.post('/productDetails/:id', (req, res) => {
+app.get('/productDetails/:id', (req, res) => {
     const productId = req.params.id;
     if (!Number.isInteger(parseInt(productId))) {
         return res.status(400).json({ error: 'Invalid product ID' });
@@ -519,7 +709,6 @@ app.post('/checkout', (req, res) => {
 
     db.query(query, [pid, price, user, email, phone, state, district, street, postal, tuid], (err, result) => {
         if (err) {
-            console.error('Error inserting data:', err);
             return res.status(500).json({ message: 'Failed to submit checkout data' });
         }
         res.status(200).json({ message: 'Checkout submitted successfully' });
@@ -612,10 +801,11 @@ app.get('/successfulBid/:uid', (req, res) => {
     const query = `
     SELECT DISTINCT ap.*, b.amount AS user_bid
     FROM add_products ap
-    INNER JOIN user_biddings b ON ap.product_id = b.pid
+    JOIN user_biddings b ON ap.product_id = b.pid
+    LEFT JOIN check_out co ON b.pid = co.pid
     WHERE b.uid = ?
-      AND ap.uid = b.uid
-      AND NOW() > DATE_ADD(ap.submitted, INTERVAL ap.days DAY)
+      AND (co.payment_id IS NULL OR co.payment_id = '')
+      AND NOW() > DATE_ADD(ap.submitted, INTERVAL days DAY)
       AND b.amount = (
         SELECT MAX(b2.amount)
         FROM user_biddings b2
@@ -625,7 +815,6 @@ app.get('/successfulBid/:uid', (req, res) => {
 
     db.query(query, [userId], (err, results) => {
         if (err) {
-            console.error('DB error:', err);
             return res.status(500).json({ error: err.message });
         }
         res.json(results);
@@ -639,16 +828,21 @@ const transactions = [];
 app.post('/submitTransaction', (req, res) => {
     const { payment_id, tuid } = req.body;
 
-    const query = 'UPDATE add_products SET payment_id=? WHERE tuid = ?';
+    const query = 'UPDATE check_out SET payment_id = ? WHERE tuid = ?';
 
     db.query(query, [payment_id, tuid], (err, results) => {
         if (err) {
-            console.error('DB error:', err);
             return res.status(500).json({ error: err.message });
         }
-        res.json(200);
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ message: 'No matching record found for tuid' });
+        }
+
+        res.status(200).json({ message: 'Transaction updated successfully' });
     });
 });
+
 
 
 // admin sends mail to all user 

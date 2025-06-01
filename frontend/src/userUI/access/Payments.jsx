@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
 import Footer from '../Footer';
-import camera from '../../pictures/camera.jpg';
 
 function Payments() {
   const [user_id, setUser_id] = useState(null);
@@ -66,7 +65,7 @@ function Payments() {
         <div className="xl:px-16 lg:px-12 md:px-10 px-6">
           {biddedProducts.length === 0 ? (
             <p className="text-gray-600 text-center w-full">
-              Currently you are not participating in any bids.
+              Currently no any product for payment. Please enjoy your day.
             </p>
           ) : (
             biddedProducts.map(product => (

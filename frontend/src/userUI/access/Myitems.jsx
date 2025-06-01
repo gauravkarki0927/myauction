@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
 import axios from 'axios';
 import Footer from '../Footer';
-import pic2 from '../../pictures/tuxedo.jpg';
-import pic11 from '../../pictures/shoes2.jpg';
 
 function Myitems() {
   const [activeSection, setActiveSection] = useState('create');
@@ -139,7 +137,6 @@ function Myitems() {
     setFormData({ ...formData, keypoints: updatedKeypoints });
   };
 
-  console.log(formData);
 
   useEffect(() => {
     if (user_id) {
@@ -241,6 +238,13 @@ function Myitems() {
       navigate(`/product?pid=${PID}`);
     }
   };
+
+  const gotoUpdate = (PID) =>{
+    if(PID){
+      navigate(`/access/updateProduct?pid=${PID}`);
+    }
+  }
+
 
   return (
     <>
@@ -513,7 +517,7 @@ function Myitems() {
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-lg">Rs.{data.price}</span>
                         <div className="flex gap-2">
-                          <button className="bg-green-800 text-gray-100 border border-gray-400 rounded-[6px] py-2 px-4 text-[13px] hover:bg-green-700 outline-none cursor-pointer" onClick={() => productDetails(data.product_id)}>
+                          <button className="bg-green-800 text-gray-100 border border-gray-400 rounded-[6px] py-2 px-4 text-[13px] hover:bg-green-700 outline-none cursor-pointer" onClick={() => gotoUpdate(data.product_id)}>
                             Update
                           </button>
                           <button className="bg-red-800 text-gray-100 border border-gray-400 rounded-[6px] py-2 px-4 text-[13px] hover:bg-red-700 outline-none cursor-pointer" onClick={() => deleteProduct(data.product_id)}>
@@ -615,7 +619,6 @@ function Myitems() {
                           className="w-full"
                           src={`http://localhost:3000/productImage/${JSON.parse(product.proImage)[0]}`}
                           alt="Product"
-                          onClick={() => productDetails(product.product_id)}
                         />
                       )}
                       <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
