@@ -13,6 +13,7 @@ import Items from './Items';
 import Approve from './Approve';
 import Update from './Update';
 import Recipts from './Recipts';
+import Winner from './Winner';
 
 function Admindash() {
     const [activeSection, setActiveSection] = useState('dashboard');
@@ -49,6 +50,105 @@ function Admindash() {
         localStorage.clear();
         navigate('/login');
     }
+
+    const [data, setDashboardData] = useState({
+        user_count: 0,
+        product_count: 0,
+        review_count: 0,
+    });
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/dashboard');
+                setDashboardData(response.data[0]);
+            } catch (err) {
+                alert('Error fetching users:', err);
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    const total_ratio = () => {
+        let { user_count, product_count } = data;
+
+        if (product_count === 0) {
+            return 'Product count is 0, cannot calculate ratio';
+        }
+
+        let ratio = (product_count / user_count) * 100;
+        return ratio.toFixed(2);
+    }
+
+    const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/users');
+                setUsers(response.data);
+            } catch (err) {
+                alert('Error fetching users:', err);
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    const [product, setProduct] = useState([]);
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/allitems');
+                setProduct(response.data);
+            } catch (err) {
+                alert('Error fetching products:', err);
+            }
+        };
+
+        fetchProduct();
+    }, []);
+
+    const [userSearch, setUserSearch] = useState('');
+    const [productSearch, setProductSearch] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+
+
+    const handleUserSearch = (e) => {
+        e.preventDefault();
+        if (!userSearch.trim()) {
+            setFilteredUsers([]); // Hide table if input is empty
+            return;
+        }
+        const result = users.filter((u) =>
+            u.user_name.toLowerCase().includes(userSearch.toLowerCase()) ||
+            u.user_email.toLowerCase().includes(userSearch.toLowerCase()) ||
+            u.user_phone.toLowerCase().includes(userSearch.toLowerCase()) ||
+            u.user_street.toLowerCase().includes(userSearch.toLowerCase()) ||
+            u.user_district.toLowerCase().includes(userSearch.toLowerCase()) ||
+            u.user_state.toLowerCase().includes(userSearch.toLowerCase())
+        );
+        setFilteredUsers(result);
+    };
+
+    const handleProductSearch = (e) => {
+        e.preventDefault();
+        if (!productSearch.trim()) {
+            setFilteredProducts([]);
+            return;
+        }
+        const result = product.filter((p) =>
+            p.productName.toLowerCase().includes(productSearch.toLowerCase()) ||
+            p.otherName.toLowerCase().includes(productSearch.toLowerCase()) ||
+            p.price.toString().includes(productSearch.toLowerCase()) ||
+            p.type.toLowerCase().includes(productSearch.toLowerCase())
+        );
+        setFilteredProducts(result);
+    };
+
+
     return (
         <>
             <div className="w-full h-auto">
@@ -111,6 +211,13 @@ function Admindash() {
                             <i className="fa-solid fa-list mx-2"></i> <span className="hidden lg:inline">View Items</span>
                         </button>
                         <button
+                            className={`flex items-center px-4 w-full py-2 border border-gray-200 rounded-sm cursor-pointer shadow-md ${activeSection === 'successful' ? 'bg-gray-600 text-white' : ''
+                                }`}
+                            onClick={() => handleButtonClick('successful')}
+                        >
+                            <i className="fa-solid fa-ranking-star mx-2"></i> <span className="hidden lg:inline">View Winners</span>
+                        </button>
+                        <button
                             className={`flex items-center px-4 w-full py-2 border border-gray-200 rounded-sm cursor-pointer shadow-md ${activeSection === 'users' ? 'bg-gray-600 text-white' : ''
                                 }`}
                             onClick={() => handleButtonClick('users')}
@@ -170,7 +277,7 @@ function Admindash() {
                                     <div className="bg-white w-full sm:w-1/2 md:w-1/4 rounded p-2">
                                         <p className="text-xs sm:text-sm md:text-[14px]">Total user</p>
                                         <h1 className="text-sm sm:text-md md:text-[18px] font-semibold px-2 sm:px-4">
-                                            5 in total
+                                            {data.user_count} in total
                                         </h1>
                                         <div className="flex gap-1 text-[10px] sm:text-[12px] md:text-[13px] items-center px-1 sm:px-2">
                                             <i className="fa-solid fa-arrow-up text-green-700"></i>
@@ -182,7 +289,7 @@ function Admindash() {
                                     <div className="bg-white w-full sm:w-1/2 md:w-1/4 rounded p-2">
                                         <p className="text-xs sm:text-sm md:text-[14px]">Total product</p>
                                         <h1 className="text-sm sm:text-md md:text-[18px] font-semibold px-2 sm:px-4">
-                                            5 in total
+                                            {data.product_count} in total
                                         </h1>
                                         <div className="flex gap-1 text-[10px] sm:text-[12px] md:text-[13px] items-center px-1 sm:px-2">
                                             <i className="fa-solid fa-arrow-up text-green-700"></i>
@@ -194,7 +301,7 @@ function Admindash() {
                                     <div className="bg-white w-full sm:w-1/2 md:w-1/4 rounded p-2">
                                         <p className="text-xs sm:text-sm md:text-[14px]">Total reviews</p>
                                         <h1 className="text-sm sm:text-md md:text-[18px] font-semibold px-2 sm:px-4">
-                                            5 in total
+                                            {data.review_count} in total
                                         </h1>
                                         <div className="flex gap-1 text-[10px] sm:text-[12px] md:text-[13px] items-center px-1 sm:px-2">
                                             <i className="fa-solid fa-arrow-up text-green-700"></i>
@@ -206,7 +313,7 @@ function Admindash() {
                                     <div className="bg-white w-full sm:w-1/2 md:w-1/4 rounded p-2">
                                         <p className="text-xs sm:text-sm md:text-[14px]">Total ratio</p>
                                         <h1 className="text-sm sm:text-md md:text-[18px] font-semibold px-2 sm:px-4">
-                                            5 in total
+                                            {total_ratio()} in total
                                         </h1>
                                         <div className="flex gap-1 text-[10px] sm:text-[12px] md:text-[13px] items-center px-1 sm:px-2">
                                             <i className="fa-solid fa-arrow-up text-green-700"></i>
@@ -217,22 +324,26 @@ function Admindash() {
                                 </div>
 
                                 <div className="bg-gray-100 w-full p-2 mb-4 flex justify-around">
-                                    <form className="flex gap-2 bg-white w-[300px] px-2 rounded-md border border-gray-200 text-[14px]">
+                                    <form onSubmit={handleUserSearch} className="flex gap-2 bg-white w-[300px] px-2 rounded-md border border-gray-200 text-[14px]">
                                         <input type="text"
                                             name="usersearch"
                                             placeholder="Search user..."
                                             className="outline-none px-2 py-1 w-full"
+                                            value={userSearch}
+                                            onChange={(e) => setUserSearch(e.target.value)}
                                         />
                                         <button className="cursor-pointer"
                                             type="submit">
                                             <i className="fa-solid fa-magnifying-glass"></i>
                                         </button>
                                     </form>
-                                    <form className="flex gap-2 bg-white w-[300px] px-2 rounded-md border border-gray-200 text-[14px]">
+                                    <form onSubmit={handleProductSearch} className="flex gap-2 bg-white w-[300px] px-2 rounded-md border border-gray-200 text-[14px]">
                                         <input type="text"
                                             name="usersearch"
                                             placeholder="Search product..."
                                             className="outline-none px-2 py-1 w-full"
+                                            value={productSearch}
+                                            onChange={(e) => setProductSearch(e.target.value)}
                                         />
                                         <button className="cursor-pointer"
                                             type="submit">
@@ -241,7 +352,95 @@ function Admindash() {
                                     </form>
                                 </div>
 
-                                <div>Search Result</div>
+                                <div className="p-2">
+                                    {filteredUsers.length > 0 && (
+                                        <div id="users" className="overflow-x-auto bg-white p-2"
+                                        >
+                                            <table className="w-full table-auto">
+                                                <thead>
+                                                    <tr className="bg-gray-200 text-gray-800 uppercase text-sm leading-normal">
+                                                        <th className="py-3 px-6 text-left">ID</th>
+                                                        <th className="py-3 px-6 text-left">Profile</th>
+                                                        <th className="py-3 px-6 text-left">Name</th>
+                                                        <th className="py-3 px-6 text-left">Email</th>
+                                                        <th className="py-3 px-6 text-left">Contact</th>
+                                                        <th className="py-3 px-6 text-left">Street</th>
+                                                        <th className="py-3 px-6 text-left">District</th>
+                                                        <th className="py-3 px-6 text-left">State</th>
+                                                        <th className="py-3 px-6 text-left">Created at</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="text-gray-700 text-sm">
+                                                    {filteredUsers.map(user => (
+                                                        <tr className="border-b border-gray-200 hover:bg-gray-100" key={user.user_id}>
+                                                            <td className="py-3 px-6 text-left">{user.user_id}</td>
+                                                            <td className="py-3 px-6 text-left">
+                                                                <img className="h-12" src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : profilePicSrc} alt="" />
+                                                            </td>
+                                                            <td className="py-3 px-6 text-left">{user.user_name}</td>
+                                                            <td className="py-3 px-6 text-left">{user.user_email}</td>
+                                                            <td className="py-3 px-6 text-left">{user.user_phone}</td>
+                                                            <td className="py-3 px-6 text-left">{user.user_street}</td>
+                                                            <td className="py-3 px-6 text-left">{user.user_district}</td>
+                                                            <td className="py-3 px-6 text-left">{user.user_state}</td>
+                                                            <td className="py-3 px-6 text-left">
+                                                                {new Date(user.created_at).toLocaleString('en-US', {
+                                                                    weekday: 'short',
+                                                                    year: 'numeric',
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit',
+                                                                    second: '2-digit',
+                                                                })}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+
+                                    {filteredProducts.length > 0 && (
+                                        <div id="products" className="overflow-x-auto bg-white p-2"
+                                        >
+                                            <table className="w-full table-auto">
+                                                <thead>
+                                                    <tr className="bg-gray-200 text-gray-800 uppercase text-sm leading-normal">
+                                                        <th className="py-3 px-6 text-left">PID</th>
+                                                        <th className="py-3 px-6 text-left">Image</th>
+                                                        <th className="py-3 px-6 text-left">Product Name</th>
+                                                        <th className="py-3 px-6 text-left">Other Name</th>
+                                                        <th className="py-3 px-6 text-left">Price</th>
+                                                        <th className="py-3 px-6 text-left">Type</th>
+                                                        <th className="py-3 px-6 text-left">Auction Days</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="text-gray-700 text-sm">
+                                                    {filteredProducts.map(data => (
+                                                        <tr className="border-b border-gray-200 hover:bg-gray-100" key={data.product_id}>
+                                                            <td className="py-3 px-6 text-left">{data.product_id}</td>
+                                                            <td className="py-3 px-6 text-left">
+                                                                {JSON.parse(data.proImage)[0] && (
+                                                                    <img
+                                                                        className="h-12"
+                                                                        src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
+                                                                        alt="Product Image"
+                                                                    />
+                                                                )}
+                                                            </td>
+                                                            <td className="py-3 px-6 text-left">{data.productName}</td>
+                                                            <td className="py-3 px-6 text-left">{data.otherName}</td>
+                                                            <td className="py-3 px-6 text-left">{data.price}</td>
+                                                            <td className="py-3 px-6 text-left">{data.type}</td>
+                                                            <td className="py-3 px-6 text-left">{data.days}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div
@@ -261,6 +460,12 @@ function Admindash() {
                             className={`h-[600px] w-full overflow-y-scroll ${activeSection === 'allitems' ? 'block' : 'hidden'
                                 }`} >
                             <Items />
+                        </div>
+                        <div
+                            id="successful"
+                            className={`h-[600px] w-full overflow-y-scroll ${activeSection === 'successful' ? 'block' : 'hidden'
+                                }`} >
+                            <Winner />
                         </div>
                         <div
                             id="users"

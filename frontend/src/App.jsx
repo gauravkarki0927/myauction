@@ -23,13 +23,14 @@ import Finalview from './userUI/access/Finalview';
 import Reviewbox from './userUI/access/Reviewbox';
 import Esewasuccess from './userUI/access/Esewasuccess';
 import Esewafailure from './userUI/access/Esewafailure';
-import Test from './userUI/access/Test';
 import Admindash from './adminUI/Admindash';
 import Innerprodetails from './userUI/access/Innerprodetails';
 import Ifilter from './userUI/access/Ifilter';
 import Forgetpass from './userUI/Forgetpass';
 import UpdateProduct from './userUI/access/UpdateProduct';
 import Verifyemail from './userUI/Verifyemail';
+import OTP from './userUI/OTP';
+import Resetpass from './userUI/Resetpass';
 
 function App() {
   return (
@@ -41,8 +42,8 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/verifyemail" element={<Verifyemail />} />
         <Route path="/forget" element={<Forgetpass />} />
-        {/* <Route path="/otp" element={<OTP />} /> */}
-        {/* <Route path="/reset" element={<Resetpass />} /> */}
+        <Route path="/otp" element={<OTP />} />
+        <Route path="/reset" element={<Resetpass />} />
         <Route path="/product" element={<Productdetails />} />
         <Route path="/viewmore" element={<Viewmore />} />
         <Route path="/allproducts" element={<Allproducts />} />
@@ -65,7 +66,6 @@ function App() {
         <Route path="/access/success" element={<Esewasuccess />} />
         <Route path="/access/failure" element={<Esewafailure />} />
         <Route path="/access/userprofile" element={<Profile />} />
-        <Route path="/access/test" element={<Test />} />
         <Route path="/admin" element={<Admindash />} />
       </Routes>
     </BrowserRouter>

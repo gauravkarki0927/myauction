@@ -2,6 +2,8 @@ import { React, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import logo from '../pictures/auclogo.jpg';
+import toast from 'react-hot-toast'
+
 
 function Login() {
 
@@ -44,13 +46,14 @@ function Login() {
                     navigate('/access/userdash');
                 }
             } else {
-                alert(response.data.error || 'Login failed. Please try again.');
+                toast.error(response.data.error || 'Login failed. Please try again.', {position: "top-right"});
             }            
         } catch (err) {
             if (err.response && err.response.data?.error) {
-                alert(err.response.data.error);
+                toast.error(err.response.data.error, { position: "top-right" });
+
             } else {
-                alert('Login failed. Please try again.');
+                toast.error('Login failed. Please try again.', { position: "top-right" });
             }
         }
     };
@@ -122,7 +125,7 @@ function Login() {
                     <div className="h-full flex items-center justify-center">
                         <div className="text-center text-white px-12">
                             <h2 className="text-4xl font-bold mb-6">Login To Your Account</h2>
-                            <p className="text-xl">Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis, expedita.</p>
+                            <p className="text-xl">Upload your products and get a fair price at sell or bid the item you are interested, it might be your lucky day!</p>
                         </div>
                     </div>
                 </div>

@@ -119,7 +119,7 @@ function Payments() {
 
                   <div>
                     <button className="bg-green-500 shadow-md text-white text-[14px] font-semibold py-2 px-4 rounded mt-3 cursor-pointer">
-                      <a href={`/access/checkout?pid=${product.product_id}&&price=${product.user_bid}`}>
+                      <a href={`/access/checkout?pid=${product.product_id}&price=${product.user_bid}`}>
                         PROCEED TO PAY
                       </a>
                     </button>

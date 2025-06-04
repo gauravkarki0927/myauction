@@ -280,30 +280,6 @@ function Signup() {
                 formDataToSend.append(key, formData[key]);
             }
 
-            // axios
-            //     .post('http://localhost:3000/signup', formDataToSend, {
-            //         headers: {
-            //             'Content-Type': 'multipart/form-data',
-            //         },
-            //     })
-            //     .then((res) => {
-            //         alert('Registration Successful');
-            //         navigate('/login');
-            //     })
-            //     .catch((err) => {
-            //         if (err.response) {
-            //             if (err.response.status === 409) {
-            //                 alert('A user with this email already exists.');
-            //             } else {
-            //                 alert(`Registration failed: ${err.response.data.error || 'Please try again.'}`);
-            //             }
-            //         } else {
-            //             alert('Registration failed. Please check your connection and try again.');
-            //         }
-
-            //         console.error('Registration error:', err);
-            //     });
-
             localStorage.setItem('pendingSignupEmail', formData.email);
 
             axios.post('http://localhost:3000/pre-signup', formDataToSend)

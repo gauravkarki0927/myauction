@@ -80,65 +80,20 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// app.post('/signup', upload.single('profileImage'), async (req, res) => {
-//   const { name, email, password, phone, dob, country, state, district, street } = req.body;
-
-//   try {
-//     const emailCheckQuery = "SELECT * FROM user_signup WHERE user_email = ?";
-//     db.query(emailCheckQuery, [email], async (err, result) => {
-//       if (err) {
-//         return res.status(500).json({ error: "Database error during email check" });
-//       }
-
-//       if (result.length > 0) {
-//         return res.status(409).json({ error: "User with this email already exists" });
-//       }
-
-//       const hashedPassword = await bcrypt.hash(password, 10);
-//       const imagePath = req.file ? req.file.filename : null;
-
-//       const insertQuery = `
-//         INSERT INTO user_signup(
-//           user_name, user_email, user_pass, user_phone,
-//           date_of_birth, user_profile, user_ctry, user_state,
-//           user_district, user_street
-//         ) VALUES (?)`;
-
-//       const values = [
-//         name, email, hashedPassword, phone, dob,
-//         imagePath, country, state, district, street
-//       ];
-
-//       db.query(insertQuery, [values], (err, data) => {
-//         if (err) {
-//           return res.status(500).json({ error: "Error inserting user into database" });
-//         }
-//         return res.status(201).json({ message: "User registered successfully", userId: data.insertId });
-//       });
-//     });
-
-//   } catch (error) {
-//     return res.status(500).json({ error: "Server error" });
-//   }
-// });
-
-const tempUsers = {}; // Use Redis in production
-
-// Step 1: Handle pre-signup and send OTP
+// route to handle user registration 
+const tempUsers = {};
 app.post('/pre-signup', upload.single('profileImage'), async (req, res) => {
     const { name, email, password, phone, dob, country, state, district, street } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const profileImage = req.file ? req.file.filename : null;
 
-    // Store in memory
     tempUsers[email] = {
         name, email, password: hashedPassword, phone, dob,
         country, state, district, street, profileImage, otp,
         timestamp: Date.now()
     };
 
-    // Send email
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -237,6 +192,117 @@ function authMiddleware(req, res, next) {
     }
 }
 
+// route to change password for forget password 
+const otpStore = {};
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'myproject.gk01@gmail.com',
+        pass: 'mjcy okrc vidj amcj',
+    }
+});
+
+// Utility function
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+}
+
+// 👉 Send OTP API
+app.post('/send_otp', (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required.' });
+
+    const otp = generateOTP();
+    otpStore[email] = otp;
+
+    const mailOptions = {
+        from: 'myproject.gk01@gmail.com',
+        to: email,
+        subject: 'Your OTP Code',
+        text: `Your OTP for password reset is: ${otp}. Do not share this with anyone.`,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+            console.error('Error sending email:', err);
+            return res.status(500).json({ message: 'Failed to send OTP.' });
+        }
+        console.log(`OTP sent to ${email}: ${otp}`);
+        return res.status(200).json({ message: 'OTP sent successfully.' });
+    });
+});
+
+// 👉 Resend OTP API
+app.post('/resend_otp', (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required.' });
+
+    const otp = generateOTP();
+    otpStore[email] = otp;
+
+    const mailOptions = {
+        from: 'myproject.gk01@gmail.com',
+        to: email,
+        subject: 'Your OTP Code (Resent)',
+        text: `Your new OTP is: ${otp}. Do not share this with anyone.`,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+            console.error('Error resending OTP:', err);
+            return res.status(500).json({ message: 'Failed to resend OTP.' });
+        }
+        return res.status(200).json({ message: 'OTP resent successfully.' });
+    });
+});
+
+// Verify OTP API
+app.post('/verify_otp', (req, res) => {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+        return res.status(400).json({ message: 'Email and OTP are required.' });
+    }
+
+    const storedOtp = otpStore[email];
+    if (storedOtp === otp) {
+        delete otpStore[email];
+        return res.status(200).json({ message: 'OTP verified successfully.' });
+    } else {
+        return res.status(401).json({ message: 'Invalid OTP.' });
+    }
+});
+
+// route to reset password 
+app.post('/reset_password', async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+        return res.status(400).json({ message: 'Email and new password are required.' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const sql = 'UPDATE user_signup SET user_pass = ? WHERE user_email = ?';
+
+        db.query(sql, [hashedPassword, email], (err, results) => {
+            if (err) {
+                console.error('Error updating password:', err);
+                return res.status(500).json({ error: 'Failed to update password' });
+            }
+
+            if (results.affectedRows > 0) {
+                res.status(200).json({ message: 'Password updated successfully' });
+            } else {
+                res.status(404).json({ message: 'User not found' });
+            }
+        });
+    } catch (err) {
+        console.error('Hashing error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 
 // Protected route
 app.get([
@@ -276,6 +342,7 @@ app.get('/users', (req, res) => {
     });
 });
 
+// route to fetch user profile 
 app.post('/userProfile', (req, res) => {
     const userId = parseInt(req.body.userId);
 
@@ -298,6 +365,49 @@ app.post('/userProfile', (req, res) => {
     });
 });
 
+// route to update user profile 
+app.post('/updateUser', upload.single('profile_pic'), (req, res) => {
+    try {
+        const userData = JSON.parse(req.body.user);
+        const {
+            user_id, user_name, user_email, user_state,
+            user_district, user_street, user_phone
+        } = userData;
+
+        const profilePic = req.file ? req.file.filename : null;
+
+        let sql = `
+      UPDATE user_signup
+      SET user_name = ?, user_email = ?, user_state = ?, 
+          user_district = ?, user_street = ?, user_phone = ?
+      ${profilePic ? ', user_profile = ?' : ''}
+      WHERE user_id = ?
+    `;
+
+        const params = [
+            user_name,
+            user_email,
+            user_state,
+            user_district,
+            user_street,
+            user_phone,
+            ...(profilePic ? [profilePic] : []),
+            user_id
+        ];
+
+        db.query(sql, params, (err, result) => {
+            if (err) {
+                console.error("Update error:", err);
+                return res.status(500).json({ error: 'Database update failed' });
+            }
+
+            res.json({ message: 'User updated successfully', result });
+        });
+    } catch (error) {
+        console.error('Update processing error:', error);
+        res.status(400).json({ error: 'Invalid user data' });
+    }
+});
 
 
 // delete route to detete user
@@ -717,7 +827,7 @@ app.post('/submitBid', async (req, res) => {
 
                 const emails = bidderResults.map(row => row.user_email);
                 if (emails.length === 0) {
-                    return res.status(200).json({ message: 'Bid successful, no previous bidders to notify' });
+                    return res.status(200).json({ message: 'Bid successful' });
                 }
 
                 const transporter = nodemailer.createTransport({
@@ -824,11 +934,11 @@ app.get('/getcheckout', (req, res) => {
             console.error('Error fetching data:', err);
             return res.status(500).json({ error: 'Database query error' });
         }
-
         res.json(results);
     });
 });
 
+// route to fetch all the products of a user
 app.get('/userproducts/:uid', (req, res) => {
     const user_id = req.params.uid;
 
@@ -893,7 +1003,7 @@ app.get('/user-participated-bids/:uid', (req, res) => {
     });
 });
 
-
+// route to fetch all successful biddings 
 app.get('/successfulBid/:uid', (req, res) => {
     const userId = req.params.uid;
 
@@ -1001,6 +1111,56 @@ app.delete('/deleteReview/:rid', (req, res) => {
     db.query(sql, [rid], (err, result) => {
         if (err) return res.status(500).send('Error deleting review');
         res.status(200).send('Review deleted');
+    });
+});
+
+app.get('/winners', (req, res) => {
+    const sql = `
+       SELECT 
+        us.user_id,
+        us.user_name,
+        us.user_email,
+        us.user_profile,
+        ap.proImage,
+        ap.productName,
+        ap.type,
+        ap.price,
+        ap.submitted
+        FROM user_biddings ub
+        JOIN (
+            SELECT pid, MAX(amount) AS max_amount
+            FROM user_biddings
+            GROUP BY pid
+        ) AS max_bids
+            ON ub.pid = max_bids.pid AND ub.amount = max_bids.max_amount
+        JOIN user_signup us ON ub.uid = us.user_id
+        JOIN add_products ap ON ub.pid = ap.product_id;
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Failed to fetch results' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// total counted data of the website 
+app.get('/dashboard', (req, res) => {
+    const sql = `
+        SELECT 
+            (SELECT COUNT(user_id) FROM user_signup us) AS user_count,
+            (SELECT COUNT(rid) FROM user_review ap) AS review_count,
+            (SELECT COUNT(product_id) FROM add_products ur WHERE ur.product_id != ur.update_id) AS product_count;
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Failed to fetch results' });
+        }
+        res.status(200).json(results);
     });
 });
 

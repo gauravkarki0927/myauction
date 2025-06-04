@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast'
+
 
 function Approve() {
 
@@ -28,7 +30,7 @@ function Approve() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    alert(data.message);
+                    toast.success(data.message, { position: "top-right" });
                 } else {
                     const errorData = await response.json();
                     alert('Error approving post: ' + (errorData.error || errorData.message));

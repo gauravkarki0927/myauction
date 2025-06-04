@@ -6,9 +6,12 @@ function Editprofile({ ussid }) {
   const [profilePicSrc, setProfilePicSrc] = useState(user_img);
   const inputFileRef = useRef(null);
 
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      setSelectedFile(file);
       setProfilePicSrc(URL.createObjectURL(file));
     }
   };
@@ -36,13 +39,32 @@ function Editprofile({ ussid }) {
     fetchProduct();
   }, [ussid]);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('user', JSON.stringify(user));
+    if (selectedFile) {
+      formData.append('profile_pic', selectedFile);
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3000/updateUser', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Failed to update profile.");
+    }
+  };
 
   return (
     <>
       <div className="p-2">
         <div className="flex flex-col md:flex-row">
           <main className="flex-1">
-            <form className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2">
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2">
               <div className="flex flex-wrap justify-around w-full">
                 <div className="w-full md:w-1/4 mb-6 md:mb-0">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
@@ -75,7 +97,8 @@ function Editprofile({ ussid }) {
                         name="email"
                         type="email"
                         placeholder="Your login email"
-                        value={user.user_email}
+                        value={user.user_email || ""}
+                        onChange={(e) => setUser({ ...user, user_email: e.target.value })}
                         className="w-full border-gray-300 placeholder:text-[14px] text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                       />
                     </div>
@@ -100,7 +123,8 @@ function Editprofile({ ussid }) {
                           name="user"
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_name}
+                          value={user.user_name || ""}
+                          onChange={(e) => setUser({ ...user, user_name: e.target.value })}
                         />
                       </div>
                       <div>
@@ -109,7 +133,8 @@ function Editprofile({ ussid }) {
                           name="state"
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_state}
+                          value={user.user_state || ""}
+                          onChange={(e) => setUser({ ...user, user_state: e.target.value })}
                         />
                       </div>
                       <div>
@@ -118,7 +143,8 @@ function Editprofile({ ussid }) {
                           name="district"
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_district}
+                          value={user.user_district || ""}
+                          onChange={(e) => setUser({ ...user, user_district: e.target.value })}
                         />
                       </div>
                       <div>
@@ -127,7 +153,8 @@ function Editprofile({ ussid }) {
                           name="street"
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_street}
+                          value={user.user_street || ""}
+                          onChange={(e) => setUser({ ...user, user_street: e.target.value })}
                         />
                       </div>
                     </div>
@@ -141,7 +168,8 @@ function Editprofile({ ussid }) {
                           name="postal"
                           type="postal"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_phone}
+                          value={user.user_phone || ""}
+                          onChange={(e) => setUser({ ...user, user_phone: e.target.value })}
                         />
                       </div>
                       <div>
@@ -175,12 +203,10 @@ function Editprofile({ ussid }) {
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">About the User</h3>
                 <textarea
-                  name="bio"
                   className="w-full mt-1 border-gray-300 text-gray-700 text-[14px] outline-none p-2 rounded border border-gray-50 resize-none"
                   rows="4"
-                >
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                </textarea>
+                  defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                />
               </div>
               <div className="my-2 flex justify-end items-center">
                 <button type="submit" className="border border-gray-200 px-4 py-2 bg-black text-white outline-none cursor-pointer text-[13px] font-semibold rounded-md">

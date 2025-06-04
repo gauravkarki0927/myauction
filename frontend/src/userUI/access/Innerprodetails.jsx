@@ -6,6 +6,7 @@ import Related from "../Related";
 import Filter from "../Filter";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
+import toast from 'react-hot-toast'
 
 function Innerprodetails() {
 
@@ -40,7 +41,7 @@ function Innerprodetails() {
                 }
             } catch (err) {
                 console.error("Error fetching product:", err);
-                alert("Failed to fetch product details.");
+                toast.error("Failed to fetch product details.", { position: "top-right", autoClose: 5000 });
             }
         };
 
@@ -119,7 +120,7 @@ function Innerprodetails() {
         else if (!/^\d+$/.test(value)) {
             setErrorMessage("Please enter a valid number.");
         }
-        else if (parseInt(value, 10) <= product.price) {
+        else if ((parseInt(value, 10) <= highestBid.highBid + 9) || (parseInt(value, 10) <= product.price + 9)){
             setErrorMessage("Please enter higher amount.");
         }
         else {
@@ -157,7 +158,7 @@ function Innerprodetails() {
 
             } catch (err) {
                 console.error(err);
-                //   navigate('/login');
+                navigate('/login');
             }
         };
         getUserData();
@@ -183,13 +184,13 @@ function Innerprodetails() {
                     const data = await response.json();
 
                     if (response.ok) {
-                        alert("Bid submitted successfully!");
+                        toast.success(("Bid submitted successfully."), { position: "top-right", autoClose: 7000 });
                     } else {
-                        alert(data.message || "Bid submission failed.");
+                        toast.error((data.message || "Bid submission failed."), { position: "top-right", autoClose: 5000 });
                     }
                 } catch (error) {
                     console.error("Bid submission error:", error);
-                    alert("Network error occurred while submitting your bid.");
+                    toast.error("Network error occurred while submitting your bid.", { position: "top-right", autoClose: 5000 });
                 }
             }
         }
@@ -209,8 +210,6 @@ function Innerprodetails() {
         };
         highBids();
     }, [productId]);
-
-
 
     return (
         <>
@@ -243,8 +242,16 @@ function Innerprodetails() {
                             <div className="mb-4 flex flex-col">
                                 <span className={`text-2xl font-bold mr-2 ${highestBid && highestBid.user === user_id
                                     ? "border-green-500 text-green-600"
-                                    : "border-red-500 text-red-600"}`}>{highestBid !== null ? `Rs.${highestBid.highBid}` : `Rs.${product.price}`}</span>
-                                <span className="text-[16px]">or Best Offer</span>
+                                    : "border-red-500 text-red-600"}`}>
+                                    {
+                                        highestBid?.highBid != null
+                                            ? `Rs.${highestBid.highBid}`
+                                            : product?.price != null && !isNaN(product.price)
+                                                ? `Rs.${product.price}`
+                                                : "Price not available"
+                                    }
+                                </span>
+                                <span className="text-[16px]">or Best Offer +10</span>
                             </div>
 
                             <p className="text-gray-700 mb-6">
@@ -277,7 +284,6 @@ function Innerprodetails() {
                                         onKeyUp={handleKeyUp}
                                         className={`w-20 border ${errorMessage ? "border-red-500" : "border-gray-300"
                                             } px-4 text-center py-2 rounded outline-none`}
-                                        required
                                     />
 
                                     {errorMessage && (

@@ -59,7 +59,7 @@ function Myitems() {
     setErrors({ ...errors, [name]: '' });
   };
 
-  const validateForm = () => {
+  const validateForm = async () => {
     let isValid = true;
     const newErrors = {};
 
@@ -70,12 +70,14 @@ function Myitems() {
       newErrors.proName = 'Product Name must contain only alphabets';
       isValid = false;
     }
+
     if (!formData.otherName.trim()) {
       newErrors.otherName = 'Brand/Nickname is required';
       isValid = false;
     }
+
     if (!formData.price.trim()) {
-      newErrors.price = 'Product Price is required';
+      newErrors.price = 'Product Initial Price is required';
       isValid = false;
     } else if (!/^\d+$/.test(formData.price)) {
       newErrors.price = 'Price must be a non symbolic number';
@@ -84,6 +86,7 @@ function Myitems() {
       newErrors.price = 'Price must be greater than 0';
       isValid = false;
     }
+
     if (!formData.proImage || formData.proImage.length === 0) {
       newErrors.proImage = 'Product Images are required';
       isValid = false;
@@ -97,12 +100,32 @@ function Myitems() {
           isValid = false;
           break;
         }
+
+        const isValidAspectRatio = await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            const ratio = img.width / img.height;
+            const expectedRatio = 4 / 3;
+            const tolerance = 0.01;
+            resolve(Math.abs(ratio - expectedRatio) <= tolerance);
+          };
+          img.onerror = () => resolve(false);
+          img.src = URL.createObjectURL(file);
+        });
+
+        if (!isValidAspectRatio) {
+          newErrors.proImage = 'Each image must have a 4:3 aspect ratio.';
+          isValid = false;
+          break;
+        }
       }
     }
+
     if (!formData.type) {
       newErrors.type = 'Product Type is required';
       isValid = false;
     }
+
     if (!formData.days.trim()) {
       newErrors.days = 'No. of Days is required';
       isValid = false;
@@ -113,6 +136,7 @@ function Myitems() {
       newErrors.days = 'Days must be greater than 0';
       isValid = false;
     }
+
     if (!formData.description.trim()) {
       newErrors.description = 'Product Details are required';
       isValid = false;
@@ -121,6 +145,7 @@ function Myitems() {
     setErrors(newErrors);
     return isValid;
   };
+
 
   const handleKeypointChange = (index, value) => {
     const updatedKeypoints = [...formData.keypoints];
@@ -149,7 +174,7 @@ function Myitems() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (validateForm()) {
+    if (await validateForm()) {
       try {
         const formDataToSend = new FormData();
         for (const key in formData) {
@@ -239,8 +264,8 @@ function Myitems() {
     }
   };
 
-  const gotoUpdate = (PID) =>{
-    if(PID){
+  const gotoUpdate = (PID) => {
+    if (PID) {
       navigate(`/access/updateProduct?pid=${PID}`);
     }
   }

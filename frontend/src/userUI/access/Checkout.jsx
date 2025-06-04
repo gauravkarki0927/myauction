@@ -238,7 +238,7 @@ const CheckoutPage = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.post(`http://localhost:3000/productDetails/${pid}`);
+                const response = await axios.get(`http://localhost:3000/productDetails/${pid}`);
                 setProduct(response.data);
             } catch (err) {
                 alert('Error fetching products:', err);

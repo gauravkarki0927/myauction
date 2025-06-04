@@ -50,7 +50,7 @@ function Admin({ uid }) {
                       <input
                       value={user.user_email}
                         className="w-full border-gray-300 placeholder:text-[14px] outline-none px-2 py-1 rounded border border-gray-50 text-gray-700 text-[14px]"
-                        disabled
+                        
                       />
                     </div>
                     <div>
@@ -58,7 +58,7 @@ function Admin({ uid }) {
                       <input
                         className="w-full border-gray-300 outline-none px-2 py-1 rounded border border-gray-50 text-gray-700 text-[14px]"
                         placeholder="********"
-                        disabled
+                        
                       />
                     </div>
                   </div>
@@ -72,7 +72,7 @@ function Admin({ uid }) {
                         <input
                         value={user.user_name}
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                          disabled
+                          
                         />
                       </div>
                       <div>
@@ -80,7 +80,7 @@ function Admin({ uid }) {
                         <input
                         value={user.user_state}
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                          disabled
+                          
                         />
                       </div>
                       <div>
@@ -88,7 +88,7 @@ function Admin({ uid }) {
                         <input
                         value={user.user_district}
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                          disabled
+                          
                         />
                       </div>
                       <div>
@@ -96,7 +96,7 @@ function Admin({ uid }) {
                         <input
                         value={user.user_street}
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                          disabled
+                          
                         />
                       </div>
                     </div>
@@ -109,7 +109,7 @@ function Admin({ uid }) {
                         <input
                         value={user.user_phone}
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                          disabled
+                          
                         />
                       </div>
                       <div>
@@ -117,7 +117,7 @@ function Admin({ uid }) {
                         <input
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                          disabled
+                          
                         />
                       </div>
                       <div>
@@ -125,7 +125,7 @@ function Admin({ uid }) {
                         <input
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                          disabled
+                          
                         />
                       </div>
                       <div>
@@ -133,7 +133,7 @@ function Admin({ uid }) {
                         <input
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50 text-gray-700 text-[14px]"
-                          disabled
+                          
                         />
                       </div>
                     </div>
@@ -145,10 +145,8 @@ function Admin({ uid }) {
                 <textarea
                   className="w-full mt-1 border-gray-300 text-gray-700 text-[14px] outline-none p-2 rounded border border-gray-50 resize-none"
                   rows="4"
-                  disabled
-                >
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                </textarea>
+                  defaultValue = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                />
               </div>
             </div>
           </main>

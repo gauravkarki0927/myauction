@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import user from '../pictures/user.jpg';
+import toast from 'react-hot-toast'
 
 function Items() {
 
@@ -18,7 +19,7 @@ function Items() {
                 const response = await axios.get('http://localhost:3000/allitems');
                 setProduct(response.data);
             } catch (err) {
-                alert('Error fetching products:', err);
+                toast.error('Error fetching products', { position: "top-right" });
             }
         };
 
@@ -179,10 +180,10 @@ function Items() {
                     },
                 })
                 .then((res) => {
-                    alert('Product updated successful');
+                    toast.success('Product updated successfully', { position: "top-right" });
                 })
                 .catch((err) => {
-                    alert('Product updated failed. Please try again.');
+                    toast.error('Product updated failed. Please try again.', { position: "top-right" });
                     console.log(err);
                 });
         } else {
@@ -200,10 +201,11 @@ function Items() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    alert(data.message);
+                    toast.success(data.message, { position: "top-right" });
                 } else {
                     const errorData = await response.json();
-                    alert('Error deleting user:', errorData.error || errorData.message);
+                    // alert('Error deleting user:', errorData.error || errorData.message);
+                    toast.error(('Error deleting user:', errorData.error || errorData.message), { position: "top-right" });
                 }
             } catch (error) {
                 alert('Network error:', error);
@@ -220,7 +222,6 @@ function Items() {
                     <thead>
                         <tr className="bg-gray-200 text-gray-800 uppercase text-sm leading-normal">
                             <th className="py-3 px-6 text-left">PID</th>
-                            {/* <th className="py-3 px-6 text-left">UserID</th> */}
                             <th className="py-3 px-6 text-left">Image</th>
                             <th className="py-3 px-6 text-left">Product Name</th>
                             <th className="py-3 px-6 text-left">Other Name</th>
