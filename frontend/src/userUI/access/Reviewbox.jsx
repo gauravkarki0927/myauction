@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../api/API.js'
 import { useNavigate } from 'react-router-dom';
 
 function Reviewbox() {
@@ -23,7 +23,7 @@ function Reviewbox() {
           return;
         }
 
-        const response = await axios.get("http://localhost:3000/access/givereview", {
+        const response = await API.get("/access/givereview", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -44,7 +44,7 @@ function Reviewbox() {
       if (!user_id) return;
 
       try {
-        const response = await axios.post("http://localhost:3000/userProfile", {
+        const response = await API.post("/userProfile", {
           userId: user_id,
         });
 
@@ -71,7 +71,7 @@ function Reviewbox() {
         review,
       };
 
-      const response = await axios.post('http://localhost:3000/reviews', payload);
+      const response = await API.post('/reviews', payload);
 
       if (response.status === 200) {
         alert('Review submitted successfully!');

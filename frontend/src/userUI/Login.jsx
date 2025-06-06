@@ -1,6 +1,6 @@
 import { React, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api/API.js';
 import logo from '../pictures/auclogo.jpg';
 import toast from 'react-hot-toast'
 
@@ -36,7 +36,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3000/login', values);
+            const response = await API.post('/login', values);
     
             if (response.status === 201) {
                 localStorage.setItem('token', response.data.token);

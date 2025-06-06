@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import API from '../api/API';
 
 function Addproduct() {
 
@@ -117,15 +118,14 @@ function Addproduct() {
         formDataToSend.append(key, formData[key]);
       }
 
-      axios
-        .post('http://localhost:3000/additems', formDataToSend, {
+      API
+        .post('/additems', formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         })
         .then((res) => {
           alert('Product added Successful');
-          navigate('/login');
         })
         .catch((err) => {
           alert('Product added failed. Please try again.');

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import API from '../api/API.js';
 
 const Sendmail = () => {
   const [to, setTo] = useState(['']);
@@ -75,12 +76,9 @@ const Sendmail = () => {
       formData.append('body', body);
       attachments.forEach((file) => formData.append('attachments', file));
 
-      const response = await fetch('http://localhost:3000/sendAmail', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await API.post(`${API}/sendAmail`, formData);
 
-      const data = await response.json();
+      const data = await response.data;
 
       if (data.success) {
         alert('Email sent successfully!');

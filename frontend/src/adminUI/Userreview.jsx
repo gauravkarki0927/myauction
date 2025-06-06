@@ -1,13 +1,14 @@
 import { React, useEffect, useState } from 'react'
 import user from '../pictures/user.jpg';
-import axios from 'axios';
+import API from '../api/API';
+import { BASE_URL } from '../api/BaseUrrlForImage';
 
 function Userreview() {
 
     const [reviews, setReviews] = useState([]);
 
     useEffect(() => {
-        axios.get(`http://localhost:3000/getReviews`)
+        API.get('/getReviews')
             .then(res => {
                 const allReviews = res.data;
                 setReviews(allReviews);
@@ -27,7 +28,7 @@ function Userreview() {
                                     {data.profile && (
                                         <img
                                             className="w-full h-full object-cover"
-                                            src={data.profile ? `http://localhost:3000/uploads/${data.profile}` : user}
+                                            src={data.profile ? `${BASE_URL}/uploads/${data.profile}` : user}
                                             alt="User Avatar"
                                         />
                                     )}

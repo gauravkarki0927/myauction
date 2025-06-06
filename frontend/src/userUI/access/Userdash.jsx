@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation'
 import Footer from '../Footer'
 import Allproducts from '../Allproducts'
-import axios from 'axios'
+import API from '../../api/API.js'
 import Ifilter from './Ifilter';
 
 function Userdash() {
@@ -19,7 +19,7 @@ function Userdash() {
           return;
         }
 
-        const response = await axios.get("http://localhost:3000/access/userdash", {
+        const response = await API.get("/access/userdash", {
           headers: {
             Authorization: `Bearer ${token}`,
           }

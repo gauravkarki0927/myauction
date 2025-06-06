@@ -6,6 +6,8 @@ import Footer from "./Footer";
 import axios from 'axios'
 import Nav from "./Nav";
 import Filter from "./Filter";
+import API from "../api/API";
+import { BASE_URL } from "../api/BaseUrrlForImage";
 
 function Productdetails() {
 
@@ -17,12 +19,10 @@ function Productdetails() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await fetch(`http://localhost:3000/productDetails/${productId}`, {
-                    method: 'GET'
-                });
+                const response = await API.get(`/productDetails/${productId}`);
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.data;
                     const productData = data[0];
                     setProduct(productData);
 
@@ -31,7 +31,7 @@ function Productdetails() {
                         setImages(parsedImages);
 
                         if (parsedImages.length > 0) {
-                            const initialImage = `http://localhost:3000/productImage/${parsedImages[0]}`;
+                            const initialImage = `${BASE_URL}/productImage/${parsedImages[0]}`;
                             setMainImageSrc(initialImage);
                         }
                     } catch (err) {
@@ -154,7 +154,7 @@ function Productdetails() {
     useEffect(() => {
         const highBids = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/highestBid/${productId}`);
+                const response = await API.get(`/highestBid/${productId}`);
                 setHighestBid(response.data);
             } catch (err) {
                 console.error("Error fetching value:", err);
@@ -178,9 +178,9 @@ function Productdetails() {
                                 className="w-full h-auto rounded-lg shadow-md mb-4" id="mainImage" />
                             <div className="flex gap-4 py-4 justify-center overflow-x-auto">
                                 {images.map((img, index) => (
-                                    <button key={index} onClick={() => changeImage(`http://localhost:3000/productImage/${img}`)}>
+                                    <button key={index} onClick={() => changeImage(`${BASE_URL}/productImage/${img}`)}>
                                         <img
-                                            src={`http://localhost:3000/productImage/${img}`}
+                                            src={`${BASE_URL}/productImage/${img}`}
                                             alt={`Thumbnail ${index + 1}`}
                                             className="w-20 h-20 object-cover rounded-md cursor-pointer opacity-60 hover:opacity-100 transition duration-300"
                                         />

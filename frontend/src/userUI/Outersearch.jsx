@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import Nav from './Nav';
 import Footer from './Footer';
 import Filter from './Filter';
 import sad from '../pictures/sad.png';
+import { BASE_URL } from '../api/BaseUrrlForImage';
+import API from '../api/API';
 
 function Outersearch() {
     const [results, setResults] = useState([]);
@@ -18,8 +19,8 @@ function Outersearch() {
             setLoading(true);
             try {
                 const url = searchItem.includes('items') ? '/filterItems' : '/searchItems';
-                const response = await axios.post(
-                    `http://localhost:3000${url}`,
+                const response = await API.post(
+                    `${url}`,
                     { searchItem },
                     { headers: { 'Content-Type': 'application/json' } }
                 );
@@ -99,7 +100,7 @@ function Outersearch() {
                                             {image && (
                                                 <img
                                                     className="w-full"
-                                                    src={`http://localhost:3000/productImage/${image}`}
+                                                    src={`${BASE_URL}/productImage/${image}`}
                                                     alt="Product"
                                                     onClick={() => productDetails(data.product_id)}
                                                 />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import API from '../api/API';
 
 function Nav() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,8 +21,8 @@ function Nav() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(
-                'http://localhost:3000/searchItems',
+            const response = await API.post(
+                '/searchItems',
                 { searchItem: search.searchItem },
                 { headers: { 'Content-Type': 'application/json' } }
             );

@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import logo from '../pictures/auclogo.jpg';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'
+import API from '../api/API.js';
 import toast from 'react-hot-toast'
 
 function Verifyemail() {
@@ -38,7 +38,7 @@ function Verifyemail() {
 
         const enteredOtp = [a, b, c, d, e, f].join('');
 
-        axios.post('http://localhost:3000/verify-otp', {
+        API.post('/verify-otp', {
             email: email,
             otp: enteredOtp
         })

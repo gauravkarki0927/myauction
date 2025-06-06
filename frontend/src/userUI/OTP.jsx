@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import logo from '../pictures/auclogo.jpg';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api/API.js';
 
 function OTP() {
     const digit1Ref = useRef(null);
@@ -56,7 +56,7 @@ function OTP() {
         }
 
         try {
-            const response = await axios.post('http://localhost:3000/verify_otp', { email, otp });
+            const response = await API.post('/verify_otp', { email, otp });
             if (response.status === 200) {
                 setSuccess('OTP verified!');
                 sessionStorage.setItem('userOtp', otp);
@@ -74,7 +74,7 @@ function OTP() {
         setError('');
         setSuccess('');
         try {
-            const response = await axios.post('http://localhost:3000/resend_otp', { email });
+            const response = await API.post('/resend_otp', { email });
             if (response.status === 200) {
                 setSuccess('OTP has been resent to your email.');
             } else {

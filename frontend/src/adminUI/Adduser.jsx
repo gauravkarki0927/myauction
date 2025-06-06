@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import API from '../api/API';
 
 function Adduser() {
 
@@ -278,8 +277,8 @@ function Adduser() {
                 formDataToSend.append(key, formData[key]);
             }
 
-            axios
-                .post('http://localhost:3000/signup', formDataToSend, {
+            API
+                .post('/signup', formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },

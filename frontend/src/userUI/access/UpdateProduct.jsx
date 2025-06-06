@@ -2,8 +2,11 @@ import { React, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navigation from './Navigation';
 import Footer from '../Footer';
+import API from '../../api/API.js'
+import { BASE_URL } from '../../api/BaseUrrlForImage.js';
 
 function UpdateProduct() {
+
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const pid = queryParams.get('pid');
@@ -26,9 +29,9 @@ function UpdateProduct() {
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
-                const response = await fetch(`http://localhost:3000/productDetails/${pid}`);
-                if (response.ok) {
-                    const data = await response.json();
+                const response = await API.get(`/productDetails/${pid}`);
+                if (response.status === 200) {
+                    const data = response.data;
                     const product = data[0];
                     const parsedImages = product.proImage ? JSON.parse(product.proImage) : [];
 
@@ -56,6 +59,7 @@ function UpdateProduct() {
             fetchProductDetails();
         }
     }, [pid]);
+
 
     const handleInputChange = (e) => {
         const { name, value, type, files } = e.target;
@@ -156,6 +160,7 @@ function UpdateProduct() {
 
     const handleUpdate = async (event) => {
         event.preventDefault();
+
         if (validateForm()) {
             try {
                 const formDataToSend = new FormData();
@@ -172,24 +177,21 @@ function UpdateProduct() {
                     }
                 }
 
-                const response = await fetch(`http://localhost:3000/updateProduct`, {
-                    method: 'POST',
-                    body: formDataToSend,
+                const response = await API.post('/updateProduct', formDataToSend, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert(data.message || 'Product updated successfully!');
-                } else {
-                    alert(`Error updating product: ${data.message || 'Unknown error'}`);
-                }
+                alert(response.data.message || 'Product updated successfully!');
             } catch (error) {
-                alert('Network error occurred');
-                console.error(error);
+                console.error('Error during update:', error);
+                const message = error.response?.data?.message || 'Network error occurred';
+                alert(`Update failed: ${message}`);
             }
         }
     };
+
 
 
     return (
@@ -275,7 +277,7 @@ function UpdateProduct() {
                                 {previousImages.map((imgName, index) => (
                                     <img
                                         key={index}
-                                        src={`http://localhost:3000/productImage/${imgName}`}
+                                        src={`${BASE_URL}/productImage/${imgName}`}
                                         alt={`Previous Upload ${index + 1}`}
                                         className="h-16 w-16 object-cover rounded border"
                                     />

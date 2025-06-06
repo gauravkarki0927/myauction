@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API from '../api/API';
 
 function Update() {
 
@@ -8,7 +9,7 @@ function Update() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/updateItems');
+                const response = await API.get('/updateItems');
                 setProduct(response.data);
             } catch (err) {
                 alert('Error fetching products:', err);
@@ -22,15 +23,13 @@ function Update() {
         const smt = confirm("Are you sure you want to approve this request?");
         if (smt) {
             try {
-                const response = await fetch(`http://localhost:3000/approveUpdate/${proID}`, {
-                    method: 'PUT',
-                });
+                const response = await API.put(`http://localhost:3000/approveUpdate/${proID}`);
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.data;
                     alert(data.message);
                 } else {
-                    const errorData = await response.json();
+                    const errorData = await response.error;
                     alert('Error approving post: ' + (errorData.error || errorData.message));
                 }
             } catch (error) {
@@ -43,15 +42,13 @@ function Update() {
         const smt = confirm("Are you sure you want to delete this request?");
         if (smt) {
             try {
-                const response = await fetch(`http://localhost:3000/deleteUpdate/${proID}`, {
-                    method: 'DELETE',
-                });
+                const response = await API.delete(`/deleteUpdate/${proID}`);
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = response.data;
                     alert(data.message);
                 } else {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     alert('Error deleting user:', errorData.error || errorData.message);
                 }
             } catch (error) {

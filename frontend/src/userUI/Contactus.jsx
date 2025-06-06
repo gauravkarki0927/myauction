@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
-import axios from 'axios'
 import Nav from './Nav';
 import Footer from './Footer';
+import API from '../api/API';
 
 function Contactus() {
     const [msg, setMsg] = useState('');
@@ -11,8 +11,6 @@ function Contactus() {
         message: ""
     
     });
-
-    const {to, subject, message} = user;
 
     const [status, setStatus] = useState('');
 
@@ -24,7 +22,7 @@ function Contactus() {
         e.preventDefault();
     
         try {
-            const response = await axios.post("http://localhost:3000/sendMail/", user);
+            const response = await API.post(`/sendMail`, user);
             setStatus(response.data.status);
             setMsg(response.data.respMesg);
         } catch (error) {

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
-import axios from 'axios';
+import API from '../../api/API.js'
 import Footer from '../Footer';
+import { BASE_URL } from '../../api/BaseUrrlForImage.js';
 
 function Myitems() {
   const [activeSection, setActiveSection] = useState('create');
@@ -18,7 +19,7 @@ function Myitems() {
           return;
         }
 
-        const response = await axios.get("http://localhost:3000/access/myitems", {
+        const response = await API.get("/access/myitems", {
           headers: {
             Authorization: `Bearer ${token}`,
           }
@@ -189,10 +190,10 @@ function Myitems() {
           }
         }
 
-
-        const response = await fetch('http://localhost:3000/additems', {
-          method: 'POST',
-          body: formDataToSend,
+        const response = await API.post('/additems', formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         });
 
         const data = await response.json();
@@ -213,7 +214,7 @@ function Myitems() {
   useEffect(() => {
     if (!user_id) return;
 
-    axios.get(`http://localhost:3000/userproducts/${user_id}`)
+    API.get(`/userproducts/${user_id}`)
       .then(res => setProducts(res.data))
       .catch(err => console.error(err));
   }, [user_id]);
@@ -223,7 +224,7 @@ function Myitems() {
     if (!confirmDelete) return;
 
     try {
-      const response = await axios.delete(`http://localhost:3000/deleteproduct/${productId}`);
+      const response = await API.delete(`/deleteproduct/${productId}`);
 
       if (response.status === 200) {
         alert('Product deleted successfully!');
@@ -239,7 +240,7 @@ function Myitems() {
 
   useEffect(() => {
     if (user_id) {
-      axios.get(`http://localhost:3000/user-bids/${user_id}`)
+      API.get(`/user-bids/${user_id}`)
         .then(res => setBiddedProducts(res.data))
         .catch(err => console.error(err));
     }
@@ -250,7 +251,7 @@ function Myitems() {
 
   useEffect(() => {
     if (user_id) {
-      axios.get(`http://localhost:3000/user-participated-bids/${user_id}`)
+      API.get(`/user-participated-bids/${user_id}`)
         .then(res => setParticipatedProducts(res.data))
         .catch(err => console.error(err));
     }
@@ -498,7 +499,7 @@ function Myitems() {
                         {JSON.parse(data.proImage)[0] && (
                           <img
                             className="w-full"
-                            src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
+                            src={`${BASE_URL}/productImage/${JSON.parse(data.proImage)[0]}`}
                             alt="Product Image"
                             onClick={() => productDetails(data.product_id)}
                           />
@@ -571,7 +572,7 @@ function Myitems() {
                       {JSON.parse(product.proImage)[0] && (
                         <img
                           className="w-full"
-                          src={`http://localhost:3000/productImage/${JSON.parse(product.proImage)[0]}`}
+                          src={`${BASE_URL}/productImage/${JSON.parse(product.proImage)[0]}`}
                           alt="Product"
                           onClick={() => productDetails(product.product_id)}
                         />
@@ -642,7 +643,7 @@ function Myitems() {
                       {JSON.parse(product.proImage)[0] && (
                         <img
                           className="w-full"
-                          src={`http://localhost:3000/productImage/${JSON.parse(product.proImage)[0]}`}
+                          src={`${BASE_URL}/productImage/${JSON.parse(product.proImage)[0]}`}
                           alt="Product"
                         />
                       )}

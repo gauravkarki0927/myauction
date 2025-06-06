@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import API from '../../api/API';
 
 function Ifilter() {
 
     const navigate = useNavigate();
     const handleFilter = async (filterData) => {
         try {
-            const response = await axios.post(
-                'http://localhost:3000/filterItems',
+            const response = await API.post(
+                '/filterItems',
                 { searchItem: filterData },
                 { headers: { 'Content-Type': 'application/json' } }
             );

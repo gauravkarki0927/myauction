@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import axios from 'axios'
+import API from '../api/API';
 
 function Contact() {
     const [msg, setMsg] = useState('');
@@ -9,8 +9,6 @@ function Contact() {
         message: ""
     
     });
-
-    const {to, subject, message} = user;
 
     const [status, setStatus] = useState('');
 
@@ -22,7 +20,7 @@ function Contact() {
         e.preventDefault();
     
         try {
-            const response = await axios.post("http://localhost:3000/sendMail/", user);
+            const response = await API.post(`/sendMail`, user);
             setStatus(response.data.status);
             setMsg(response.data.respMesg);
         } catch (error) {

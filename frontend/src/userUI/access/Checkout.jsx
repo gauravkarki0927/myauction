@@ -6,8 +6,9 @@ import imepay from '../../pictures/imepay.jpg';
 import Navigation from './Navigation';
 import Footer from '../Footer';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { v4 as uuidv4 } from "uuid";
+import API from '../../api/API';
+import { BASE_URL } from '../../api/BaseUrrlForImage';
 
 const CheckoutPage = () => {
 
@@ -211,12 +212,10 @@ const CheckoutPage = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
-                const response = await fetch('http://localhost:3000/checkout', {
-                    method: 'POST',
+                const response = await API.post('/checkout', formData , {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData),
                 });
 
                 const result = await response.json();
@@ -239,7 +238,7 @@ const CheckoutPage = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/productDetails/${pid}`);
+                const response = await API.get(`/productDetails/${pid}`);
                 setProduct(response.data);
             } catch (err) {
                 alert('Error fetching products:', err);
@@ -403,7 +402,7 @@ const CheckoutPage = () => {
                                             {JSON.parse(data.proImage)[0] && (
                                                 <img
                                                     className="w-40 mr-3"
-                                                    src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
+                                                    src={`${BASE_URL}/productImage/${JSON.parse(data.proImage)[0]}`}
                                                     alt="Product Image"
                                                     onClick={() => productDetails(data.product_id)}
                                                 />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import logo from '../pictures/auclogo.jpg';
-import axios from 'axios';
+import API from '../api/API.js';
 import { useNavigate } from 'react-router-dom';
 
 function Resetpass() {
@@ -56,7 +56,7 @@ function Resetpass() {
         }
 
         try {
-            const response = await axios.post('http://localhost:3000/reset_password', {
+            const response = await API.post('/reset_password', {
                 email: storedEmail,
                 newPassword: password,
             });

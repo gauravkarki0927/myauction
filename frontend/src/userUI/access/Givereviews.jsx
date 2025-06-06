@@ -2,8 +2,9 @@ import Navigation from './Navigation';
 import Footer from '../Footer';
 import Reviewbox from './Reviewbox';
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import API from '../../api/API';
+import { BASE_URL } from '../../api/BaseUrrlForImage';
 
 function Givereviews() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ function Givereviews() {
           return;
         }
 
-        const response = await axios.get("http://localhost:3000/access/givereview", {
+        const response = await API.get("/access/givereview", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -41,7 +42,7 @@ function Givereviews() {
 
   useEffect(() => {
     if (user_id) {
-      axios.get(`http://localhost:3000/getReviews`)
+      API.get(`/getReviews`)
         .then(res => {
           const allReviews = res.data;
           setReviews(allReviews);
@@ -54,7 +55,7 @@ function Givereviews() {
   }, [user_id]);
 
   const handleEdit = (rid, newReview) => {
-    axios.put(`http://localhost:3000/updateReview/${rid}`, { review: newReview })
+    API.put(`/updateReview/${rid}`, { review: newReview })
       .then(() => {
         setReviews(prev =>
           prev.map(r => r.rid === rid ? { ...r, review: newReview } : r)
@@ -72,7 +73,7 @@ function Givereviews() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:3000/deleteReview/${rid}`);
+      await API.delete(`/deleteReview/${rid}`);
       setReviews(prev => prev.filter(r => r.rid !== rid));
       alert("Review deleted successfully!");
     } catch (err) {
@@ -96,7 +97,7 @@ function Givereviews() {
                     {data.profile && (
                       <img
                         className="w-full h-full object-cover"
-                        src={`http://localhost:3000/uploads/${data.profile}`}
+                        src={`${BASE_URL}/uploads/${data.profile}`}
                         alt="Profile"
                       />
                     )}

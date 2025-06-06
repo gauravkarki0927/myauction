@@ -16,28 +16,22 @@ function Forgetpass() {
         setMessage('');
 
         try {
-            const response = await fetch('http://localhost:3000/send_otp', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email }),
-            });
+            const response = await API.post('/send_otp', { email });
 
-            const data = await response.json();
-            if (response.ok) {
+            if (response.status === 200) {
                 sessionStorage.setItem('pendingSignupEmail', email);
                 setMessage('OTP has been sent to your email.');
                 navigate('/otp');
             } else {
-                setMessage(data.message || 'Something went wrong.');
+                setMessage(response.data?.message || 'Something went wrong.');
             }
         } catch (error) {
-            setMessage('Server error.', error);
+            setMessage(error.response?.data?.message || 'Server error.');
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen flex justify-center items-center">

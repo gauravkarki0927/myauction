@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import API from '../../api/API.js'
 import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
 import Footer from '../Footer';
+import { BASE_URL } from '../../api/BaseUrrlForImage.js';
 
 function Payments() {
   const [user_id, setUser_id] = useState(null);
@@ -18,7 +19,7 @@ function Payments() {
           return;
         }
 
-        const response = await axios.get("http://localhost:3000/access/myitems", {
+        const response = await API.get("/access/myitems", {
           headers: {
             Authorization: `Bearer ${token}`,
           }
@@ -35,19 +36,12 @@ function Payments() {
 
   useEffect(() => {
     if (user_id) {
-      axios.get(`http://localhost:3000/successfulBid/${user_id}`)
+      API.get(`/successfulBid/${user_id}`)
         .then(res => setBiddedProducts(res.data))
         .catch(err => console.error(err));
     }
   }, [user_id]);
 
-  const productDetails = (PID) => {
-    if (user_id) {
-      navigate(`/access/innerproduct?pid=${PID}`);
-    } else {
-      navigate(`/product?pid=${PID}`);
-    }
-  };
 
   let keyPointsList = [];
   try {
@@ -77,7 +71,7 @@ function Payments() {
                   {JSON.parse(product.proImage)[0] && (
                     <img
                       className="w-[430px] object-contain"
-                      src={`http://localhost:3000/productImage/${JSON.parse(product.proImage)[0]}`}
+                      src={`${BASE_URL}/productImage/${JSON.parse(product.proImage)[0]}`}
                       alt="Product Image"
                     />
                   )}

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import API from '../api/API';
 
 function Recipts() {
     const [records, setRecords] = useState([]);
 
     useEffect(() => {
-        axios.get('http://localhost:3000/getcheckout')
+        API.get('/getcheckout')
             .then(response => setRecords(response.data))
             .catch(error => console.error('Error fetching checkout records:', error));
     }, []);

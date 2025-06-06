@@ -5,8 +5,9 @@ import Footer from "../Footer";
 import Related from "../Related";
 import Filter from "../Filter";
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'
 import toast from 'react-hot-toast'
+import API from "../../api/API";
+import { BASE_URL } from "../../api/BaseUrrlForImage";
 
 function Innerprodetails() {
 
@@ -19,12 +20,10 @@ function Innerprodetails() {
         const fetchProduct = async () => {
 
             try {
-                const response = await fetch(`http://localhost:3000/productDetails/${productId}`, {
-                    method: 'GET',
-                });
+                const response = await API.get(`/productDetails/${productId}`);
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data =  response.data;
 
                     const productData = data[0];
                     setProduct(productData);
@@ -33,7 +32,7 @@ function Innerprodetails() {
                         const parsedImages = JSON.parse(productData.proImage);
                         setImages(parsedImages);
 
-                        const initialImage = `http://localhost:3000/productImage/${parsedImages[0]}`;
+                        const initialImage = `${API}/productImage/${parsedImages[0]}`;
                         setMainImageSrc(initialImage);
                     } catch (err) {
                         console.error("Invalid JSON in proImage", err);
@@ -120,7 +119,7 @@ function Innerprodetails() {
         else if (!/^\d+$/.test(value)) {
             setErrorMessage("Please enter a valid number.");
         }
-        else if ((parseInt(value, 10) <= highestBid.highBid + 9) || (parseInt(value, 10) <= product.price + 9)){
+        else if ((parseInt(value, 10) <= highestBid.highBid + 9) || (parseInt(value, 10) <= product.price + 9)) {
             setErrorMessage("Please enter higher amount.");
         }
         else {
@@ -148,7 +147,7 @@ function Innerprodetails() {
                     return;
                 }
 
-                const response = await axios.get("http://localhost:3000/access/innerproduct", {
+                const response = await API.get("/access/innerproduct", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
@@ -169,10 +168,9 @@ function Innerprodetails() {
         if (user_id) {
             if (!errorMessage && biddingAmount) {
                 try {
-                    const response = await fetch("http://localhost:3000/submitBid", {
-                        method: "POST",
+                    const response = await API.post('/submitBid', {
                         headers: {
-                            "Content-Type": "application/json",
+                            'Content-Type': 'multipart/form-data',
                         },
                         body: JSON.stringify({
                             productId: productId,
@@ -201,7 +199,7 @@ function Innerprodetails() {
     useEffect(() => {
         const highBids = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/highestBid/${productId}`);
+                const response = await API.get(`/highestBid/${productId}`);
                 setHighestBid(response.data);
             } catch (err) {
                 console.error("Error fetching value:", err);
@@ -224,9 +222,9 @@ function Innerprodetails() {
                                 className="w-full h-auto rounded-lg shadow-md mb-4" id="mainImage" />
                             <div className="flex gap-4 py-4 justify-center overflow-x-auto">
                                 {images.map((img, index) => (
-                                    <button key={index} onClick={() => changeImage(`http://localhost:3000/productImage/${img}`)}>
+                                    <button key={index} onClick={() => changeImage(`${BASE_URL}/productImage/${img}`)}>
                                         <img
-                                            src={`http://localhost:3000/productImage/${img}`}
+                                            src={`${BASE_URL}/productImage/${img}`}
                                             alt={`Thumbnail ${index + 1}`}
                                             className="w-20 h-20 object-cover rounded-md cursor-pointer opacity-60 hover:opacity-100 transition duration-300"
                                         />

@@ -7,8 +7,12 @@ import khalti from '../../pictures/khalti.jpg';
 import imepay from '../../pictures/imepay.jpg';
 import Navigation from './Navigation';
 import Footer from '../Footer';
+import { BASE_URL } from '../../api/BaseUrrlForImage';
 
 const Finalview = () => {
+
+    const esewaHeaderUrl = import.meta.env.ESEWA_HEADER_URL;
+    const esewaProductCode = import.meta.env.ESEWA_PRODUCT_CODE;
 
     const location = useLocation();
     const checkout_data = location.state;
@@ -19,9 +23,9 @@ const Finalview = () => {
         transaction_uuid: checkout_data.tuid,
         product_service_charge: "0",
         product_delivery_charge: "0",
-        product_code: "EPAYTEST",
-        success_url: "http://localhost:5173/access/success",
-        failure_url: "http://localhost:5173/access/failure",
+        product_code: esewaProductCode,
+        success_url: `${esewaHeaderUrl}/access/success`,
+        failure_url: `${esewaHeaderUrl}/access/failure`,
         signed_field_names: "total_amount,transaction_uuid,product_code",
         signature: "",
         secret: "8gBm/:&EnhH.1/q",
@@ -51,6 +55,21 @@ const Finalview = () => {
 
         setformData({ ...formData, signature: hashedSignature });
     }, [formData.amount]);
+
+    const [product, setProduct] = useState([]);
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const response = await API.get(`/productDetails/${checkout_data.pid}`);
+                setProduct(response.data);
+            } catch (err) {
+                alert('Error fetching products:', err);
+            }
+        };
+
+        fetchProduct();
+    }, []);
 
     return (
         <>
@@ -188,130 +207,143 @@ const Finalview = () => {
                         <div className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-3 flex items-center justify-center gap-4">
                             <p className="font-semibold">Click here for payment <i className="fa-solid fa-arrow-right mx-1"></i> </p>
                             <form
-                            action="https://rc-epay.esewa.com.np/api/epay/main/v2/form"
-                            method="POST"
+                                action="https://rc-epay.esewa.com.np/api/epay/main/v2/form"
+                                method="POST"
                             >
-                            <div className="field">
+                                <div className="field">
+                                    <input
+                                        type="hidden"
+                                        id="amount"
+                                        name="amount"
+                                        autoComplete="off"
+                                        value={formData.amount}
+                                        onChange={({ target }) =>
+                                            setformData({
+                                                ...formData,
+                                                amount: target.value,
+                                                total_amount: target.value,
+                                            })
+                                        }
+                                        required
+                                    />
+                                </div>
                                 <input
                                     type="hidden"
-                                    id="amount"
-                                    name="amount"
-                                    autoComplete="off"
-                                    value={formData.amount}
-                                    onChange={({ target }) =>
-                                        setformData({
-                                            ...formData,
-                                            amount: target.value,
-                                            total_amount: target.value,
-                                        })
-                                    }
+                                    id="tax_amount"
+                                    name="tax_amount"
+                                    value={formData.tax_amount}
                                     required
                                 />
-                            </div>
-                            <input
-                                type="hidden"
-                                id="tax_amount"
-                                name="tax_amount"
-                                value={formData.tax_amount}
-                                required
-                            />
-                            <input
-                                type="hidden"
-                                id="total_amount"
-                                name="total_amount"
-                                value={formData.total_amount}
-                                required
-                            />
-                            <input
-                                type="hidden"
-                                id="transaction_uuid"
-                                name="transaction_uuid"
-                                value={formData.transaction_uuid}
-                                required
-                            />
-                            <input
-                                type="hidden"
-                                id="product_code"
-                                name="product_code"
-                                value={formData.product_code}
-                                required
-                            />
-                            <input
-                                type="hidden"
-                                id="product_service_charge"
-                                name="product_service_charge"
-                                value={formData.product_service_charge}
-                                required
-                            />
-                            <input
-                                type="hidden"
-                                id="product_delivery_charge"
-                                name="product_delivery_charge"
-                                value={formData.product_delivery_charge}
-                                required
-                            />
-                            <input
-                                type="hidden"
-                                id="success_url"
-                                name="success_url"
-                                value={formData.success_url}
-                                required
-                            />
-                            <input
-                                type="hidden"
-                                id="failure_url"
-                                name="failure_url"
-                                value={formData.failure_url}
-                                required
-                            />
-                            <input
-                                type="hidden"
-                                id="signed_field_names"
-                                name="signed_field_names"
-                                value={formData.signed_field_names}
-                                required
-                            />
-                            <input
-                                type="hidden"
-                                id="signature"
-                                name="signature"
-                                value={formData.signature}
-                                required
-                            />
-                            <button type="submit" className="border border-gray-200 bg-gray-100 rounded shadow-md cursor-pointer">
-                                <img className="h-12 border border-gray-100" src={esewa} alt="" />
-                            </button>
-                        </form>
+                                <input
+                                    type="hidden"
+                                    id="total_amount"
+                                    name="total_amount"
+                                    value={formData.total_amount}
+                                    required
+                                />
+                                <input
+                                    type="hidden"
+                                    id="transaction_uuid"
+                                    name="transaction_uuid"
+                                    value={formData.transaction_uuid}
+                                    required
+                                />
+                                <input
+                                    type="hidden"
+                                    id="product_code"
+                                    name="product_code"
+                                    value={formData.product_code}
+                                    required
+                                />
+                                <input
+                                    type="hidden"
+                                    id="product_service_charge"
+                                    name="product_service_charge"
+                                    value={formData.product_service_charge}
+                                    required
+                                />
+                                <input
+                                    type="hidden"
+                                    id="product_delivery_charge"
+                                    name="product_delivery_charge"
+                                    value={formData.product_delivery_charge}
+                                    required
+                                />
+                                <input
+                                    type="hidden"
+                                    id="success_url"
+                                    name="success_url"
+                                    value={formData.success_url}
+                                    required
+                                />
+                                <input
+                                    type="hidden"
+                                    id="failure_url"
+                                    name="failure_url"
+                                    value={formData.failure_url}
+                                    required
+                                />
+                                <input
+                                    type="hidden"
+                                    id="signed_field_names"
+                                    name="signed_field_names"
+                                    value={formData.signed_field_names}
+                                    required
+                                />
+                                <input
+                                    type="hidden"
+                                    id="signature"
+                                    name="signature"
+                                    value={formData.signature}
+                                    required
+                                />
+                                <button type="submit" className="border border-gray-200 bg-gray-100 rounded shadow-md cursor-pointer">
+                                    <img className="h-12 border border-gray-100" src={esewa} alt="" />
+                                </button>
+                            </form>
 
-                    </div>
-                </div>
-
-                <div className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-5">
-                    <h3 className="text-lg font-semibold mb-3">
-                        BAG SUMMARY <span className="text-gray-500">?</span>
-                    </h3>
-                    <p className="text-xs">Arrives in 4-7 days</p>
-                    <div className="flex items-center">
-                        <img
-                            src="your-hoodie-image.jpg"
-                            alt="Hoodie"
-                            className="w-20 mr-3"
-                        />
-                        <div>
-                            <p>Men's UA Hustle Fleece Hoodie</p>
-                            <p className="text-xs">1300123-025-XL</p>
-                            <p className="text-xs">True Gray Heather (025), XL</p>
-                            <p className="text-xs line-through">$49.99 CDN</p>
-                            <p className="text-red-500">$37.49 CDN x 1</p>
                         </div>
                     </div>
-                    <div className="flex justify-end mt-2">
-                        <button className="bg-transparent border-none cursor-pointer text-xs">Edit</button>
-                        <button className="bg-transparent border-none cursor-pointer text-xs ml-2">Remove</button>
+
+                    <div className="border border-gray-300 outline-none shadow-md rounded placeholder:text-[14px] text-[14px] p-5">
+                        <h3 className="text-lg font-semibold mb-3">
+                            YOUR PRODUCT
+                        </h3>
+                        <p className="text-xs">Arrives in 4-7 days</p>
+                        <div className="flex flex-wrap h-auto w-full p-2">
+                            {product.map(data => (
+                                <div className="flex gap-2 bg-white rounded overflow-hidden w-full" key={data.product_id}>
+                                    <div className="relative">
+                                        {JSON.parse(data.proImage)[0] && (
+                                            <img
+                                                className="w-40 mr-3"
+                                                src={`${BASE_URL}/productImage/${JSON.parse(data.proImage)[0]}`}
+                                                alt="Product Image"
+                                                onClick={() => productDetails(data.product_id)}
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="px-4 space-y-1">
+                                        <p>{data.productName}</p>
+                                        <p className="text-xs">
+                                            {data.otherName}
+                                        </p>
+                                        <p className="text-xs">
+                                            {data.type}
+                                        </p>
+                                        <p className="text-xs">
+                                            {data.submitted}
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-red-600 text-lg">Rs.{bidPrice}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
-        </form >
+            </form >
             <Footer />
         </>
     );

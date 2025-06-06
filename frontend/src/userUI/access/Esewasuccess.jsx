@@ -1,5 +1,6 @@
 import { React, useEffect } from "react"
 import { useLocation } from 'react-router-dom';
+import API from "../../api/API";
 
 
 function Esewasuccess() {
@@ -17,8 +18,7 @@ function Esewasuccess() {
                 console.log('Transaction Data:', parsed);
 
                 if (parsed) {
-                    fetch('http://localhost:3000/submitTransaction', {
-                        method: 'POST',
+                    API.post('/submitTransaction', {
                         headers: {
                             'Content-Type': 'application/json',
                         },

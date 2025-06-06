@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import logo from '../pictures/auclogo.jpg';
-import axios from 'axios'
+import API from '../api/API.js';
 import { useNavigate } from 'react-router-dom'
 
 function Signup() {
@@ -285,7 +285,7 @@ function Signup() {
 
             localStorage.setItem('pendingSignupEmail', formData.email);
 
-            axios.post('http://localhost:3000/pre-signup', formDataToSend)
+            API.post('/pre-signup', formDataToSend)
                 .then(() => {
                     alert("Verification code sent to your email.");
                     navigate('/verifyemail');

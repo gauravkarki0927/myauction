@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios'
+import API from '../../api/API.js'
 import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
 import Footer from '../Footer';
 import user_img from '../../pictures/user.jpg';
+import { BASE_URL } from '../../api/BaseUrrlForImage.js';
 
 function Profile() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -36,7 +37,7 @@ function Profile() {
           return;
         }
 
-        const response = await axios.get("http://localhost:3000/access/userprofile", {
+        const response = await API.get("/access/userprofile", {
           headers: {
             Authorization: `Bearer ${token}`,
           }
@@ -55,7 +56,7 @@ function Profile() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.post("http://localhost:3000/userProfile", {
+        const response = await API.post("/userProfile", {
           userId: user,
         });
         if (response.data.length > 0) {
@@ -110,7 +111,7 @@ function Profile() {
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
                     <div className="flex flex-col items-center px-4">
                       <div className="w-36 h-42 border border-gray-200 rounded overflow-hidden mb-4">
-                        <img src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : user_img} alt="User Avatar" className="w-full h-full object-cover" />
+                        <img src={user.user_profile ? `${BASE_URL}/uploads/${user.user_profile}` : user_img} alt="User Avatar" className="w-full h-full object-cover" />
                       </div>
                       <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">
                         <button className="text-gray-600 border border-gray-200 px-16 py-1 bg-white outline-none cursor-pointer text-[13px] font-semibold rounded-md">
@@ -233,7 +234,7 @@ function Profile() {
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
                     <div className="flex flex-col items-center px-4">
                       <div className="w-36 h-42 rounded overflow-hidden mb-4">
-                        <img src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
+                        <img src={user.user_profile ? `${BASE_URL}/uploads/${user.user_profile}` : profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
                       </div>
 
                       <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">

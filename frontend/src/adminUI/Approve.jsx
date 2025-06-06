@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast'
+import API from '../api/API';
+import { BASE_URL } from '../api/BaseUrrlForImage';
 
 
 function Approve() {
@@ -10,7 +11,7 @@ function Approve() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/approveProduct');
+                const response = await API.get('/approveProduct');
                 setProduct(response.data);
             } catch (err) {
                 alert('Error fetching products:', err);
@@ -24,15 +25,13 @@ function Approve() {
         const smt = confirm("Are you sure you want to approve this post?");
         if (smt) {
             try {
-                const response = await fetch(`http://localhost:3000/approvePro/${proID}`, {
-                    method: 'PUT',
-                });
+                const response = await API.put(`/approvePro/${proID}`);
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = response.data;
                     toast.success(data.message, { position: "top-right" });
                 } else {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     alert('Error approving post: ' + (errorData.error || errorData.message));
                 }
             } catch (error) {
@@ -46,15 +45,13 @@ function Approve() {
         const smt = confirm("Are you sure you want to delete this request?");
         if (smt) {
             try {
-                const response = await fetch(`http://localhost:3000/deleteApprove/${proID}`, {
-                    method: 'DELETE',
-                });
+                const response = await API.delete(`/deleteApprove/${proID}`);
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data =  response.data;
                     alert(data.message);
                 } else {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     alert('Error deleting user:', errorData.error || errorData.message);
                 }
             } catch (error) {
@@ -89,7 +86,7 @@ function Approve() {
                                 {JSON.parse(data.proImage)[0] && (
                                     <img
                                         className="h-12"
-                                        src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
+                                        src={`${BASE_URL}/productImage/${JSON.parse(data.proImage)[0]}`}
                                         alt="Product Image"
                                     />
                                 )}

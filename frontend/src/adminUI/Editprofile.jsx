@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import user_img from '../pictures/user.jpg';
-import axios from 'axios';
+import { BASE_URL } from '../api/BaseUrrlForImage.js';
+import API from '../api/API.js';
 
 function Editprofile({ ussid }) {
   const [profilePicSrc, setProfilePicSrc] = useState(user_img);
@@ -25,7 +26,7 @@ function Editprofile({ ussid }) {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.post("http://localhost:3000/userProfile", {
+        const response = await API.post(`/userProfile`, {
           userId: ussid,
         });
         if (response.data.length > 0) {
@@ -49,10 +50,12 @@ function Editprofile({ ussid }) {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/updateUser', formData, {
+      const response = await API.post(`${API}/updateUser`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      alert("Profile updated successfully!");
+      if(response.status == 200){
+              alert("Profile updated successfully!");
+      }
     } catch (error) {
       console.error("Error updating user:", error);
       alert("Failed to update profile.");
@@ -70,7 +73,7 @@ function Editprofile({ ussid }) {
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
                   <div className="flex flex-col items-center px-4">
                     <div className="w-36 h-42 rounded overflow-hidden mb-4">
-                      <img src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
+                      <img src={user.user_profile ? `${BASE_URL}/uploads/${user.user_profile}` : profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
                     </div>
 
                     <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">

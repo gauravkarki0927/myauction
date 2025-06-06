@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-
+import API from '../../api/API.js'
 import sad from '../../pictures/sad.png';
 import Navigation from './Navigation';
 import Filter from '../Filter';
 import Footer from '../Footer';
+import { BASE_URL } from '../../api/BaseUrrlForImage.js';
 
 function Innersearch() {
     const [product, setProduct] = useState([]);
@@ -26,7 +26,7 @@ function Innersearch() {
                     return;
                 }
 
-                await axios.get("http://localhost:3000/access/myitems", {
+                await API.get("/access/myitems", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -43,8 +43,8 @@ function Innersearch() {
         const fetchData = async () => {
             try {
                 const url = searchItem.includes('items') ? '/filterItems' : '/searchItems';
-                const response = await axios.post(
-                    `http://localhost:3000${url}`,
+                const response = await API.post(
+                    `${url}`,
                     { searchItem },
                     { headers: { 'Content-Type': 'application/json' } }
                 );
@@ -107,7 +107,7 @@ function Innersearch() {
                         {image && (
                             <img
                                 className="w-full"
-                                src={`http://localhost:3000/productImage/${image}`}
+                                src={`${BASE_URL}/productImage/${image}`}
                                 alt="Product"
                                 onClick={() => productDetails(data.product_id)}
                             />

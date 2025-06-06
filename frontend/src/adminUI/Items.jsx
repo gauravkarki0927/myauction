@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast'
+import { BASE_URL } from '../api/BaseUrrlForImage';
+import API from '../api/API';
 
 function Items() {
 
@@ -14,7 +15,7 @@ function Items() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/allitems');
+                const response = await API.get('/allitems');
                 setProduct(response.data);
             } catch (err) {
                 toast.error('Error fetching products', { position: "top-right" });
@@ -171,8 +172,8 @@ function Items() {
                 formDataToSend.append(key, formData[key]);
             }
 
-            axios
-                .post('http://localhost:3000/updateitems', formDataToSend, {
+            API
+                .post('/updateitems', formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -193,16 +194,13 @@ function Items() {
         const smt = confirm("Are you sure you want to delete this user?");
         if (smt) {
             try {
-                const response = await fetch(`http://localhost:3000/deletepro/${proID}`, {
-                    method: 'DELETE',
-                });
+                const response = await API.delete(`/deletepro/${proID}`);
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = response.data;
                     toast.success(data.message, { position: "top-right" });
                 } else {
-                    const errorData = await response.json();
-                    // alert('Error deleting user:', errorData.error || errorData.message);
+                    const errorData = response.data;
                     toast.error(('Error deleting user:', errorData.error || errorData.message), { position: "top-right" });
                 }
             } catch (error) {
@@ -237,7 +235,7 @@ function Items() {
                                     {JSON.parse(data.proImage)[0] && (
                                         <img
                                             className="h-12"
-                                            src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
+                                            src={`${BASE_URL}/productImage/${JSON.parse(data.proImage)[0]}`}
                                             alt="Product Image"
                                         />
                                     )}
@@ -356,7 +354,7 @@ function Items() {
                                     {previousImages.map((imgName, index) => (
                                         <img
                                             key={index}
-                                            src={`http://localhost:3000/productImage/${imgName}`}
+                                            src={`${BASE_URL}/productImage/${imgName}`}
                                             alt={`Previous Upload ${index + 1}`}
                                             className="h-16 w-16 object-cover rounded border"
                                         />

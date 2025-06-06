@@ -366,11 +366,11 @@ app.post('/userProfile', (req, res) => {
 });
 
 // route to update user profile 
-app.post('/updateUser', upload.single('profile_pic'), (req, res) => {
+app.post('/updateUser/:id', upload.single('profile_pic'), (req, res) => {
     try {
         const userData = JSON.parse(req.body.user);
         const {
-            user_id, user_name, user_email, user_state,
+            user_name, user_email, user_state,
             user_district, user_street, user_phone
         } = userData;
 
@@ -392,7 +392,7 @@ app.post('/updateUser', upload.single('profile_pic'), (req, res) => {
             user_street,
             user_phone,
             ...(profilePic ? [profilePic] : []),
-            user_id
+            id
         ];
 
         db.query(sql, params, (err, result) => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { BASE_URL } from '../api/BaseUrrlForImage';
+import API from '../api/API';
 
 function Allproducts({ user_id }) {
 
@@ -9,7 +10,7 @@ function Allproducts({ user_id }) {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/allitems');
+                const response = await API.get(`/allitems`);
                 setProduct(response.data);
             } catch (err) {
                 alert('Error fetching products:', err);
@@ -43,7 +44,7 @@ function Allproducts({ user_id }) {
                                     {JSON.parse(data.proImage)[0] && (
                                         <img
                                             className="w-full"
-                                            src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
+                                            src={`${BASE_URL}/productImage/${JSON.parse(data.proImage)[0]}`}
                                             alt="Product Image"
                                             onClick={() => productDetails(data.product_id)}
                                         />

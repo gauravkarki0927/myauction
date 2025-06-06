@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from 'react'
-import axios from 'axios';
-import profile from '../pictures/user.jpg';
 import toast from 'react-hot-toast'
+import { BASE_URL } from '../api/BaseUrrlForImage.js';
+import API from '../api/API';
 
 function Notification() {
 
@@ -12,7 +12,7 @@ function Notification() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/getApproves');
+                const response = await API.get('/getApproves');
                 setProducts(response.data);
             } catch (err) {
                 toast.error('Error fetching products', { position: "top-right" });
@@ -65,7 +65,7 @@ function Notification() {
 
     const markAsRead = async () => {
         try {
-            await axios.post('http://localhost:3000/markAsRead', { ids: selectedProducts });
+            await API.post('/markAsRead', { ids: selectedProducts });
             toast.success('Marked as read', { position: "top-right" });
 
             setProducts(prev =>
@@ -134,7 +134,7 @@ function Notification() {
                                             {JSON.parse(prods.proImage)[0] && (
                                                 <img
                                                     className="w-24 h-20 sm:w-20 sm:h-16 object-cover rounded-sm ml-6 sm:ml-0"
-                                                    src={`http://localhost:3000/productImage/${JSON.parse(prods.proImage)[0]}`}
+                                                    src={`${BASE_URL}/productImage/${JSON.parse(prods.proImage)[0]}`}
                                                     alt="Product Image"
                                                 />
                                             )}

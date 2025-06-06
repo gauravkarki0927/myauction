@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-
 import img1 from '../pictures/user.jpg';
+import API from '../api/API';
+import { BASE_URL } from '../api/BaseUrrlForImage';
 
 function Users() {
 
@@ -14,7 +14,7 @@ function Users() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/users');
+                const response = await API.get('/users');
                 setUsers(response.data);
             } catch (err) {
                 alert('Error fetching users:', err);
@@ -49,15 +49,13 @@ function Users() {
         const smt = confirm("Are you sure you want to delete this user?");
         if (smt) {
             try {
-                const response = await fetch(`http://localhost:3000/delete/${userId}`, {
-                    method: 'DELETE',
-                });
+                const response = await API.delete(`/delete/${userId}`);
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = response.data;
                     alert(data.message);
                 } else {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     alert('Error deleting user:', errorData.error || errorData.message);
                 }
             } catch (error) {
@@ -90,7 +88,7 @@ function Users() {
                             <tr className="border-b border-gray-200 hover:bg-gray-100" key={user.user_id}>
                                 <td className="py-3 px-6 text-left">{user.user_id}</td>
                                 <td className="py-3 px-6 text-left">
-                                    <img className="h-12" src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : profilePicSrc} alt="" />
+                                    <img className="h-12" src={user.user_profile ? `${BASE_URL}/uploads/${user.user_profile}` : profilePicSrc} alt="" />
                                 </td>
                                 <td className="py-3 px-6 text-left">{user.user_name}</td>
                                 <td className="py-3 px-6 text-left">{user.user_email}</td>
@@ -129,7 +127,7 @@ function Users() {
                                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
                                         <div className="flex flex-col items-center px-4">
                                             <div className="w-36 h-42 rounded overflow-hidden mb-4">
-                                                <img src={selectedUser.user_profile ? `http://localhost:3000/uploads/${selectedUser.user_profile}` : profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
+                                                <img src={selectedUser.user_profile ? `${BASE_URL}/uploads/${selectedUser.user_profile}` : profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
                                             </div>
 
                                             <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">

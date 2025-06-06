@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'
 import logo from '../pictures/auclogo.jpg';
 import Addproduct from './Addproduct';
 import Adduser from './Adduser';
@@ -15,6 +14,8 @@ import Update from './Update';
 import Recipts from './Recipts';
 import Winner from './Winner';
 import Notification from './Notification';
+import { BASE_URL } from '../api/BaseUrrlForImage';
+import API from '../api/API';
 
 
 function Admindash() {
@@ -34,7 +35,7 @@ function Admindash() {
                     return;
                 }
 
-                const response = await axios.get("http://localhost:3000/access/userdash", {
+                const response = await API.get("/access/userdash", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
@@ -61,7 +62,7 @@ function Admindash() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/dashboard');
+                const response = await API.get('/dashboard');
                 setDashboardData(response.data[0]);
             } catch (err) {
                 alert('Error fetching users:', err);
@@ -87,7 +88,7 @@ function Admindash() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/users');
+                const response = await API.get('/users');
                 setUsers(response.data);
             } catch (err) {
                 alert('Error fetching users:', err);
@@ -102,7 +103,7 @@ function Admindash() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/allitems');
+                const response = await API.get('/allitems');
                 setProduct(response.data);
             } catch (err) {
                 alert('Error fetching products:', err);
@@ -155,8 +156,8 @@ function Admindash() {
     useEffect(() => {
         const fetchPendingCount = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/getCounts');
-                setPendingCount(response.data.datus); // Access the "datus" field
+                const response = await API.get('/getCounts');
+                setPendingCount(response.data.datus);
             } catch (error) {
                 console.error('Error fetching count:', error);
             }
@@ -414,7 +415,7 @@ function Admindash() {
                                                         <tr className="border-b border-gray-200 hover:bg-gray-100" key={user.user_id}>
                                                             <td className="py-3 px-6 text-left">{user.user_id}</td>
                                                             <td className="py-3 px-6 text-left">
-                                                                <img className="h-12" src={user.user_profile ? `http://localhost:3000/uploads/${user.user_profile}` : profilePicSrc} alt="" />
+                                                                <img className="h-12" src={user.user_profile ? `${BASE_URL}/uploads/${user.user_profile}` : profilePicSrc} alt="" />
                                                             </td>
                                                             <td className="py-3 px-6 text-left">{user.user_name}</td>
                                                             <td className="py-3 px-6 text-left">{user.user_email}</td>
@@ -463,7 +464,7 @@ function Admindash() {
                                                                 {JSON.parse(data.proImage)[0] && (
                                                                     <img
                                                                         className="h-12"
-                                                                        src={`http://localhost:3000/productImage/${JSON.parse(data.proImage)[0]}`}
+                                                                        src={`${BASE_URL}/productImage/${JSON.parse(data.proImage)[0]}`}
                                                                         alt="Product Image"
                                                                     />
                                                                 )}
