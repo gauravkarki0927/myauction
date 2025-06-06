@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 function Filter() {
-
+    
     const navigate = useNavigate();
+
     const handleFilter = async (filterData) => {
         try {
             const response = await axios.post(
@@ -12,9 +13,9 @@ function Filter() {
                 { searchItem: filterData },
                 { headers: { 'Content-Type': 'application/json' } }
             );
-    
+
             if (response.status === 200) {
-                navigate('/search', { state: { searchItem: filterData } });
+                navigate('/search', { state: { searchItem: filterData, results: response.data } });
             } else {
                 alert('Error searching product: ' + response.statusText);
             }
@@ -22,7 +23,7 @@ function Filter() {
             alert('Network error: ' + error.message);
         }
     };
-    
+
 
     return (
         <>
@@ -33,9 +34,6 @@ function Filter() {
                     </button>
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('newitems')}>
                         New items
-                    </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('upcoming')}>
-                        Upcoming items
                     </button>
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Antique')}>
                         Antique
@@ -55,8 +53,8 @@ function Filter() {
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Software')}>
                         Softwares
                     </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Sclupture')}>
-                        Sclupture
+                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Sculpture')}>
+                        Sculpture
                     </button>
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Transport')}>
                         Transports

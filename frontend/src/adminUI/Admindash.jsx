@@ -14,6 +14,8 @@ import Approve from './Approve';
 import Update from './Update';
 import Recipts from './Recipts';
 import Winner from './Winner';
+import Notification from './Notification';
+
 
 function Admindash() {
     const [activeSection, setActiveSection] = useState('dashboard');
@@ -148,11 +150,25 @@ function Admindash() {
         setFilteredProducts(result);
     };
 
+    const [pendingCount, setPendingCount] = useState(0);
+
+    useEffect(() => {
+        const fetchPendingCount = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/getCounts');
+                setPendingCount(response.data.datus); // Access the "datus" field
+            } catch (error) {
+                console.error('Error fetching count:', error);
+            }
+        };
+
+        fetchPendingCount();
+    }, []);
 
     return (
         <>
             <div className="w-full h-auto">
-                <div className="flex justify-between items-center px-4 py-1">
+                <div className="flex justify-between items-center px-4 py-1 mt-1">
                     <div>
                         <p className="font-semibold text-xl md:text-2xl lg:text-3xl xl:text-4xl">
                             <a className="outline-none" href="/admin">
@@ -169,8 +185,31 @@ function Admindash() {
                     </div>
 
                     <div className="flex gap-2 md:gap-4 items-center text-sm md:text-md lg:text-lg px-2 md:px-4 lg:px-8">
-                        <button onClick={() => handleButtonClick('notify')}>
-                            <i className="fa-regular fa-bell text-blue-700 cursor-pointer border border-gray-100 p-1 md:p-2 bg-gray-100 hover:bg-blue-700 hover:text-white rounded-full"></i>
+                        <button onClick={() => handleButtonClick('notify')} className="relative">
+                            <i className="fa-regular fa-bell 
+                                    text-blue-700 
+                                    cursor-pointer 
+                                    border border-gray-100 
+                                    p-1.5 lg:p-2 
+                                    text-base lg:text-xl 
+                                    bg-gray-100 
+                                    hover:bg-blue-700 hover:text-white 
+                                    rounded-full
+                                "></i>
+
+                            {pendingCount > 0 && (
+                                <span className="
+                                        absolute -top-1 -right-1 
+                                        bg-red-600 text-white 
+                                        text-[10px] lg:text-xs 
+                                        font-bold 
+                                        px-1 py-0.5 
+                                        rounded-full 
+                                        leading-none
+                                    ">
+                                    {pendingCount}
+                                </span>
+                            )}
                         </button>
                         <button onClick={() => handleButtonClick('sendmail')}>
                             <i className="fa-regular fa-envelope text-red-600 cursor-pointer border border-gray-100 p-1 md:p-2 bg-gray-100 hover:bg-red-600 hover:text-white rounded-full"></i>
@@ -511,9 +550,9 @@ function Admindash() {
                         </div>
                         <div
                             id="notify"
-                            className={`h-[600px] w-full overflow-y-scroll bg-black ${activeSection === 'notify' ? 'block' : 'hidden'
+                            className={`h-[600px] w-full overflow-y-scroll ${activeSection === 'notify' ? 'block' : 'hidden'
                                 }`} >
-                            Notification
+                            <Notification />
                         </div>
                         <div
                             id="sendmail"

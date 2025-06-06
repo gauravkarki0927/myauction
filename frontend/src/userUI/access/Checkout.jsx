@@ -143,6 +143,7 @@ const CheckoutPage = () => {
         setState(selectedState);
         setDistricts(districtOptions[selectedState] || []);
         setFormData({ ...formData, state: selectedState, district: '' });
+        setErrors((prevErrors) => ({ ...prevErrors, state: '' }));
     };
 
     const handleChange = (e) => {

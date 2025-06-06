@@ -34,9 +34,6 @@ function Ifilter() {
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('newitems')}>
                         New items
                     </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('upcoming')}>
-                        Upcoming items
-                    </button>
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Antique')}>
                         Antique
                     </button>
@@ -55,8 +52,8 @@ function Ifilter() {
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Software')}>
                         Softwares
                     </button>
-                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Sclupture')}>
-                        Sclupture
+                    <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Sculpture')}>
+                        Sculpture
                     </button>
                     <button className="font-semibold text-[13px] cursor-pointer hover:shadow-md p-1 rounded" onClick={() => handleFilter('Transport')}>
                         Transports

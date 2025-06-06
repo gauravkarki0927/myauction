@@ -512,7 +512,7 @@ app.get('/approveProduct', (req, res) => {
     const sql = `
         SELECT *
         FROM add_products
-        WHERE DATE_ADD(submitted, INTERVAL days DAY) > NOW() AND approve = ''
+        WHERE DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND approve = ''
     `;
 
     db.query(sql, (err, results) => {
@@ -550,7 +550,7 @@ app.put('/approvePro/:id', (req, res) => {
         return res.status(400).json({ error: 'Invalid product ID' });
     }
 
-    const sql = 'UPDATE add_products SET `approve`=1 WHERE product_id = ?';
+    const sql = 'UPDATE add_products SET `approve`=1, recorded= NOW() WHERE product_id = ?';
 
     db.query(sql, [proId], (err, result) => {
         if (err) {
@@ -573,7 +573,7 @@ app.get('/allitems', (req, res) => {
     const sql = `
         SELECT *
         FROM add_products
-        WHERE DATE_ADD(submitted, INTERVAL days DAY) > NOW() AND update_id = '' AND approve = 1
+        WHERE DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND update_id = '' AND approve = 1
     `;
 
     db.query(sql, (err, results) => {
@@ -590,7 +590,7 @@ app.get('/updateItems', (req, res) => {
     const sql = `
         SELECT *
         FROM add_products
-        WHERE DATE_ADD(submitted, INTERVAL days DAY) > NOW() AND update_id != ''
+        WHERE DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND update_id != ''
     `;
 
     db.query(sql, (err, results) => {
@@ -752,15 +752,13 @@ app.post('/filterItems', (req, res) => {
     let values = [];
 
     if (searchItem === 'allitems') {
-        sql = 'SELECT * FROM add_products';
+        sql = 'SELECT * FROM add_products WHERE approve=1';
     } else if (searchItem === 'newitems') {
-        sql = 'SELECT * FROM add_products ORDER BY product_id DESC';
-    } else if (searchItem === 'upcoming') {
-        sql = 'SELECT * FROM add_products WHERE listed = 0';
+        sql = 'SELECT * FROM add_products WHERE approve=1 ORDER BY product_id DESC';
     } else {
-        sql = 'SELECT * FROM add_products WHERE type LIKE ?';
+        sql = 'SELECT * FROM add_products WHERE approve=1 AND type LIKE ?';
+        values = [`%${searchItem}%`];
     }
-    values = [`%${searchItem}%`];
 
     db.query(sql, values, (err, result) => {
         if (err) {
@@ -768,20 +766,17 @@ app.post('/filterItems', (req, res) => {
             return res.status(500).json({ error: 'Failed to fetch data' });
         }
 
-        if (result.length > 0) {
-            res.status(200).json(result);
-        } else {
-            res.status(200).json([]);
-        }
+        res.status(200).json(result);
     });
 });
+
 
 // route to update the user biddings
 app.post('/submitBid', async (req, res) => {
 
     const { productId, userId, amount } = req.body;
 
-    const productSql = "SELECT submitted, days FROM add_products WHERE product_id = ?";
+    const productSql = "SELECT recorded, days FROM add_products WHERE product_id = ?";
     db.query(productSql, [productId], (err, results) => {
         if (err) {
             console.error('Error fetching product info:', err);
@@ -975,8 +970,8 @@ app.get('/user-bids/:uid', (req, res) => {
     FROM add_products ap
     JOIN user_biddings b ON ap.product_id = b.pid
     WHERE b.uid = ?
-      AND NOW() >= ap.submitted
-      AND NOW() <= DATE_ADD(ap.submitted, INTERVAL ap.days DAY)
+      AND NOW() >= ap.recorded
+      AND NOW() <= DATE_ADD(ap.recorded, INTERVAL ap.days DAY)
   `;
 
     db.query(query, [userId], (err, results) => {
@@ -994,7 +989,7 @@ app.get('/user-participated-bids/:uid', (req, res) => {
     FROM add_products ap
     INNER JOIN user_biddings b ON ap.product_id = b.pid
     WHERE b.uid = ?
-      AND NOW() > DATE_ADD(ap.submitted, INTERVAL ap.days DAY)
+      AND NOW() > DATE_ADD(ap.recorded, INTERVAL ap.days DAY)
   `;
 
     db.query(query, [userId], (err, results) => {
@@ -1014,7 +1009,7 @@ app.get('/successfulBid/:uid', (req, res) => {
     LEFT JOIN check_out co ON b.pid = co.pid
     WHERE b.uid = ?
       AND (co.payment_id IS NULL OR co.payment_id = '')
-      AND NOW() > DATE_ADD(ap.submitted, INTERVAL days DAY)
+      AND NOW() > DATE_ADD(ap.recorded, INTERVAL days DAY)
       AND b.amount = (
         SELECT MAX(b2.amount)
         FROM user_biddings b2
@@ -1125,7 +1120,7 @@ app.get('/winners', (req, res) => {
         ap.productName,
         ap.type,
         ap.price,
-        ap.submitted
+        ap.recorded
         FROM user_biddings ub
         JOIN (
             SELECT pid, MAX(amount) AS max_amount
@@ -1161,6 +1156,62 @@ app.get('/dashboard', (req, res) => {
             return res.status(500).json({ error: 'Failed to fetch results' });
         }
         res.status(200).json(results);
+    });
+});
+
+// route to count notifucation data for admin notification 
+app.get('/getCounts', (req, res) => {
+    const sql = `
+        SELECT COUNT(product_id) AS datus
+        FROM add_products 
+        WHERE (approve = 0 OR update_id = 1) AND read_as=0;
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching data:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        res.status(200).json({ datus: results[0].datus });
+    });
+});
+
+// route to fetch data for admin notification 
+app.get('/getApproves', (req, res) => {
+    const sql = `
+        SELECT add_products.*, user_signup.* 
+        FROM add_products 
+        JOIN user_signup ON user_signup.user_id = add_products.uid 
+        WHERE add_products.approve = 0 OR add_products.update_id = 1
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching data:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// route to update read_as to admin notifucations 
+app.post('/markAsRead', (req, res) => {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: 'No product IDs provided' });
+    }
+
+    const placeholders = ids.map(() => '?').join(',');
+    const sql = `UPDATE add_products SET read_as = 1 WHERE product_id IN (${placeholders})`;
+
+    db.query(sql, ids, (err, result) => {
+        if (err) {
+            console.error('Error updating read_as:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        return res.status(200).json({ message: 'Marked as read', affectedRows: result.affectedRows });
     });
 });
 

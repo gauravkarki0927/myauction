@@ -63,9 +63,9 @@ function Productdetails() {
     const [remainingTime, setRemainingTime] = useState("");
 
     useEffect(() => {
-        if (!product.submitted || !product.days) return;
+        if (!product.recorded || !product.days) return;
 
-        const postDate = new Date(product.submitted);
+        const postDate = new Date(product.recorded);
         const endDate = new Date(postDate);
         endDate.setDate(endDate.getDate() + product.days);
 
@@ -94,7 +94,7 @@ function Productdetails() {
         const timer = setInterval(updateRemainingTime, 1000);
 
         return () => clearInterval(timer);
-    }, [product.submitted, product.days]);
+    }, [product.recorded, product.days]);
 
     const handleShare = async () => {
         const url = window.location.href;
@@ -122,8 +122,8 @@ function Productdetails() {
         else if (!/^\d+$/.test(value)) {
             setErrorMessage("Please enter a valid number.");
         }
-        else if (parseInt(value, 10) <= highestBid.highBid + 20) {
-            setErrorMessage("Please enter 20 higher than amount.");
+        else if ((parseInt(value, 10) <= highestBid.highBid + 9) || (parseInt(value, 10) <= product.price + 9)){
+            setErrorMessage("Please enter Rs.10 higher than amount.");
         }
         else {
             setErrorMessage("");
@@ -193,7 +193,13 @@ function Productdetails() {
                             <h2 className="text-3xl font-bold mb-2">{product.productName}</h2>
                             <p className="text-gray-600 mb-4">{product.otherName}</p>
                             <div className="mb-4 flex flex-col">
-                                <span className="text-2xl font-bold mr-2">{highestBid !== null ? `Rs.${highestBid.highBid}` : `Rs.${product.price}`}</span>
+                                <span className="text-2xl font-bold mr-2">{
+                                    highestBid?.highBid != null
+                                        ? `Rs.${highestBid.highBid}`
+                                        : product?.price != null && !isNaN(product.price)
+                                            ? `Rs.${product.price}`
+                                            : "Price not available"
+                                }</span>
                                 <span className="text-[16px]">or Best Offer</span>
                             </div>
                             <p className="text-gray-700 mb-6">

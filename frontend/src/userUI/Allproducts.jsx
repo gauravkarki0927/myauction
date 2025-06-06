@@ -59,7 +59,7 @@ function Allproducts({ user_id }) {
                                     {data.type}
                                 </p>
                                 {(() => {
-                                    const postDate = new Date(data.submitted);
+                                    const postDate = new Date(data.recorded);
                                     const durationInDays = data.days || 0;
 
                                     if (isNaN(postDate.getTime())) {

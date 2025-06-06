@@ -217,14 +217,14 @@ function Addproduct() {
             className="w-full mt-1 border-gray-300 outline-none p-2 rounded shadow-sm border border-gray-100"
           >
             <option value="">-Choose Categories-</option>
-            <option value="Eletronics">Electronics</option>
+            <option value="Eletronic">Electronic</option>
             <option value="Communication">Communication</option>
             <option value="Transport">Transport</option>
             <option value="Antique">Antique</option>
-            <option value="Softwares">Softwares</option>
-            <option value="Artifacts">Artifacts</option>
+            <option value="Software">Software</option>
+            <option value="Artifact">Artifact</option>
             <option value="Clothing">Clothing</option>
-            <option value="Sclupture">Sclupture</option>
+            <option value="Sculpture">Sculpture</option>
           </select>
           {errors.type && (
             <p className="mt-1 text-sm text-red-500">{errors.type}</p>

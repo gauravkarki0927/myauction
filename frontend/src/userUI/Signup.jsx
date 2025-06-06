@@ -130,7 +130,9 @@ function Signup() {
         setState(selectedState);
         setDistricts(districtOptions[selectedState] || []);
         setFormData({ ...formData, state: selectedState, district: '' });
+        setErrors((prevErrors) => ({ ...prevErrors, state: '' }));
     };
+
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -220,10 +222,11 @@ function Signup() {
             isValid = false;
         }
 
-        if (!formData.state) {
+        if (!formData.state || formData.state === '') {
             newErrors.state = 'State is required';
             isValid = false;
         }
+
 
         if (!formData.district) {
             newErrors.district = 'District is required';
@@ -458,7 +461,7 @@ function Signup() {
                                     >
                                         <option value="">-Choose district-</option>
                                         {districts.map((d, index) => (
-                                            <option key={index} value={d.value}>
+                                            <option key={index} value={d}>
                                                 {d}
                                             </option>
                                         ))}

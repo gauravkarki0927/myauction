@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import user from '../pictures/user.jpg';
 import toast from 'react-hot-toast'
 
 function Items() {
 
     const [activeSection, setActiveSection] = useState('records');
-    const [profilePicSrc, setProfilePicSrc] = useState(user);
     const inputFileRef = useRef(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [previousImages, setPreviousImages] = useState([]);
