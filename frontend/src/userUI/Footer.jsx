@@ -1,7 +1,15 @@
 import React from 'react'
 import logo from '../pictures/auclogo.jpg';
+import { useNavigate } from 'react-router-dom';
 
-function Footer() {
+function Footer({ userid }) {
+
+    const navigate = useNavigate();
+    const Subscribe = () => {
+        if (!userid) {
+            navigate('/login');
+        }
+    };
     return (
         <>
             <footer className="bg-white">
@@ -39,8 +47,8 @@ function Footer() {
 
                                         <button type="none"
                                             className="mt-1 w-full px-6 py-3 text-sm font-bold tracking-wide bg-gray-200 shadow-md rounded cursor-pointer uppercase sm:mt-0 sm:w-auto sm:shrink-0"
-                                        >
-                                            <a href="/login">Suscribe</a>
+                                            onClick={() => Subscribe()}
+                                        >Subscribe
                                         </button>
                                     </div>
                                 </form>

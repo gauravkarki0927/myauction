@@ -84,7 +84,8 @@ function Allproducts({ user_id }) {
                                         return <p className="text-red-800 text-[13px] font-semibold">Auction Ended</p>;
                                     }
                                     return <p className="text-red-800 text-[13px]">Ends at {formatted}</p>;                                    
-                                })()}                                <div className="flex items-center justify-between">
+                                })()}                                
+                                <div className="flex items-center justify-between">
                                     <span className="font-bold text-lg">Rs.{data.price}</span>
                                     <button className="bg-transparent text-gray-900 border border-gray-800 rounded-[100px] font-bold py-2 px-4 text-[13px] hover:bg-black hover:text-white outline-none cursor-pointer" onClick={() => productDetails(data.product_id)}>
                                         Bid Now

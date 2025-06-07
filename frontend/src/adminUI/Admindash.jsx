@@ -541,13 +541,13 @@ function Admindash() {
                             id="profile"
                             className={`h-[600px] w-full overflow-y-scroll ${activeSection === 'profile' ? 'block' : 'hidden'
                                 }`} >
-                            <Admin uid={user_id} />
+                            {user_id !== null && <Admin uid={user_id} />}
                         </div>
                         <div
                             id="editprofile"
                             className={`h-[600px] w-full overflow-y-scroll ${activeSection === 'editprofile' ? 'block' : 'hidden'
                                 }`} >
-                            <Editprofile ussid={user_id} />
+                            {user_id !== null && <Editprofile ussid={user_id} />}
                         </div>
                         <div
                             id="notify"

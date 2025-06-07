@@ -15,7 +15,7 @@ function Items() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await API.get('/allitems');
+                const response = await API.get('/allitemsAdmin');
                 setProduct(response.data);
             } catch (err) {
                 toast.error('Error fetching products', { position: "top-right" });
@@ -223,7 +223,7 @@ function Items() {
                             <th className="py-3 px-6 text-left">Other Name</th>
                             <th className="py-3 px-6 text-left">Price</th>
                             <th className="py-3 px-6 text-left">Type</th>
-                            <th className="py-3 px-6 text-left">Auction Days</th>
+                            <th className="py-3 px-6 text-left">Status</th>
                             <th className="py-3 px-6 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -244,7 +244,22 @@ function Items() {
                                 <td className="py-3 px-6 text-left">{data.otherName}</td>
                                 <td className="py-3 px-6 text-left">{data.price}</td>
                                 <td className="py-3 px-6 text-left">{data.type}</td>
-                                <td className="py-3 px-6 text-left">{data.days}</td>
+                                    {(() => {
+                                        const postDate = new Date(data.recorded);
+                                        const durationInDays = data.days || 0;
+
+                                        if (isNaN(postDate.getTime())) {
+                                            return <p className="text-red-800 text-[13px]">Invalid date</p>;
+                                        }
+
+                                        const endDate = new Date(postDate);
+                                        endDate.setDate(endDate.getDate() + durationInDays);
+
+                                        if (endDate < new Date()) {
+                                            return <td className="py-3 px-6 text-left text-red-500">Ended</td>
+                                        }
+                                            return <td className="py-3 px-6 text-left text-green-500">Running</td>
+                                    })()}
                                 <td className="py-3 px-6 text-center">
                                     <div className="flex item-center justify-center">
                                         <button className="w-4 mr-2 transform hover:text-blue-500 hover:scale-110" onClick={() => handleEditClick(data)}>

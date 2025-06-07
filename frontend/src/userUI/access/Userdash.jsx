@@ -38,8 +38,8 @@ function Userdash() {
     <>
       <Navigation />
       <Ifilter />
-      <Allproducts user_id={user_id} />
-      <Footer />
+      {user_id !== null && <Allproducts user_id={user_id} />}
+      {user_id !== null && <Footer userid={user_id} />}
     </>
   )
 }

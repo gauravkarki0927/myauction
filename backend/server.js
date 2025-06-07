@@ -365,90 +365,91 @@ app.post('/userProfile', (req, res) => {
     });
 });
 
+
 // route to update user profile 
 app.post('/updateUser', upload.single('user_profile'), async (req, res) => {
-  try {
-    const {
-      user_id,
-      user_name,
-      user_email,
-      user_password,
-      user_state,
-      user_district,
-      user_street,
-      user_phone
-    } = req.body;
+    try {
+        const {
+            user_id,
+            user_name,
+            user_email,
+            user_password,
+            user_state,
+            user_district,
+            user_street,
+            user_phone
+        } = req.body;
 
-    const user_profile = req.file ? req.file.filename : null;
+        const user_profile = req.file ? req.file.filename : null;
 
-    const fieldsToUpdate = [];
-    const params = [];
+        const fieldsToUpdate = [];
+        const params = [];
 
-    if (user_name) {
-      fieldsToUpdate.push('user_name = ?');
-      params.push(user_name);
-    }
+        if (user_name) {
+            fieldsToUpdate.push('user_name = ?');
+            params.push(user_name);
+        }
 
-    if (user_email) {
-      fieldsToUpdate.push('user_email = ?');
-      params.push(user_email);
-    }
+        if (user_email) {
+            fieldsToUpdate.push('user_email = ?');
+            params.push(user_email);
+        }
 
-    if (user_password) {
-      const hashedPassword = await bcrypt.hash(user_password, 10);
-      fieldsToUpdate.push('user_pass = ?');
-      params.push(hashedPassword);
-    }
+        if (user_password) {
+            const hashedPassword = await bcrypt.hash(user_password, 10);
+            fieldsToUpdate.push('user_pass = ?');
+            params.push(hashedPassword);
+        }
 
-    if (user_state) {
-      fieldsToUpdate.push('user_state = ?');
-      params.push(user_state);
-    }
+        if (user_state) {
+            fieldsToUpdate.push('user_state = ?');
+            params.push(user_state);
+        }
 
-    if (user_district) {
-      fieldsToUpdate.push('user_district = ?');
-      params.push(user_district);
-    }
+        if (user_district) {
+            fieldsToUpdate.push('user_district = ?');
+            params.push(user_district);
+        }
 
-    if (user_street) {
-      fieldsToUpdate.push('user_street = ?');
-      params.push(user_street);
-    }
+        if (user_street) {
+            fieldsToUpdate.push('user_street = ?');
+            params.push(user_street);
+        }
 
-    if (user_phone) {
-      fieldsToUpdate.push('user_phone = ?');
-      params.push(user_phone);
-    }
+        if (user_phone) {
+            fieldsToUpdate.push('user_phone = ?');
+            params.push(user_phone);
+        }
 
-    if (user_profile) {
-      fieldsToUpdate.push('user_profile = ?');
-      params.push(user_profile);
-    }
+        if (user_profile) {
+            fieldsToUpdate.push('user_profile = ?');
+            params.push(user_profile);
+        }
 
-    if (!fieldsToUpdate.length) {
-      return res.status(400).json({ error: 'No fields provided for update' });
-    }
+        if (!fieldsToUpdate.length) {
+            return res.status(400).json({ error: 'No fields provided for update' });
+        }
 
-    const sql = `
+        const sql = `
       UPDATE user_signup
       SET ${fieldsToUpdate.join(', ')}
       WHERE user_id = ?
     `;
 
-    params.push(user_id);
+        params.push(user_id);
 
-    db.query(sql, params, (err, result) => {
-      if (err) {
-        console.error("Update error:", err);
-        return res.status(500).json({ error: 'Database update failed' });
-      }
+        db.query(sql, params, (err, result) => {
+            if (err) {
+                console.error("Update error:", err);
+                return res.status(500).json({ error: 'Database update failed' });
+            }
 
-      res.json({ message: 'User updated successfully', result });
-    });
-  } catch (error) {
-    console.error('Update processing error:', error);
-    res.status(400).json({ error: 'Invalid user data' });
-  }
+            res.json({ message: 'User updated successfully', result });
+        });
+    } catch (error) {
+        console.error('Update processing error:', error);
+        res.status(400).json({ error: 'Invalid user data' });
+    }
 });
 
 
@@ -615,7 +616,24 @@ app.get('/allitems', (req, res) => {
     const sql = `
         SELECT *
         FROM add_products
-        WHERE DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND update_id = '' AND approve = 1
+        WHERE DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND update_id = 0 AND approve = 1
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Failed to fetch results' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// route to fetch all products for admin
+app.get('/allitemsAdmin', (req, res) => {
+    const sql = `
+        SELECT *
+        FROM add_products
+        WHERE approve = 1 AND update_id=0
     `;
 
     db.query(sql, (err, results) => {
@@ -766,7 +784,7 @@ app.post('/searchItems', (req, res) => {
         return res.status(400).json({ error: 'Missing search term' });
     }
 
-    const sql = 'SELECT * FROM add_products WHERE CONCAT(productName, otherName, price, type) LIKE ?';
+    const sql = 'SELECT * FROM add_products WHERE DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND update_id = 0 AND approve = 1 AND CONCAT(productName, otherName, price, type) LIKE ?';
 
     db.query(sql, [`%${searchItem}%`], (err, result) => {
         if (err) {
@@ -794,11 +812,11 @@ app.post('/filterItems', (req, res) => {
     let values = [];
 
     if (searchItem === 'allitems') {
-        sql = 'SELECT * FROM add_products WHERE approve=1';
+        sql = 'SELECT * FROM add_products WHERE DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND update_id = 0 AND approve = 1';
     } else if (searchItem === 'newitems') {
-        sql = 'SELECT * FROM add_products WHERE approve=1 ORDER BY product_id DESC';
+        sql = 'SELECT * FROM add_products WHERE DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND update_id = 0 AND approve = 1 ORDER BY product_id DESC';
     } else {
-        sql = 'SELECT * FROM add_products WHERE approve=1 AND type LIKE ?';
+        sql = 'SELECT * FROM add_products WHERE approve = 1 AND DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND update_id = 0 AND type LIKE ?';
         values = [`%${searchItem}%`];
     }
 
@@ -979,7 +997,7 @@ app.get('/getcheckout', (req, res) => {
 app.get('/userproducts/:uid', (req, res) => {
     const user_id = req.params.uid;
 
-    const query = 'SELECT * FROM add_products where uid=?';
+    const query = 'SELECT * FROM add_products WHERE DATE_ADD(recorded, INTERVAL days DAY) > NOW() AND update_id = 0 AND approve = 1 AND uid=?';
     db.query(query, [user_id], (err, results) => {
         if (err) {
             return res.status(500).json({ error: err.message });

@@ -369,7 +369,7 @@ function Myitems() {
               </div>
               <div className="mb-4">
                 <label htmlFor="proImage" className="block text-sm font-medium">
-                  Product Images <span className="text-red-500">*</span>
+                  Product Images [4:3 ratio] <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="file"
@@ -491,70 +491,74 @@ function Myitems() {
               }`}
           >
             <div className="flex flex-col gap-2 py-4" id="product">
-              <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
-                {products.map(data => (
-                  <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]" key={data.product_id}>
-                    <div className="relative">
-                      <div className="cursor-pointer">
-                        {JSON.parse(data.proImage)[0] && (
-                          <img
-                            className="w-full"
-                            src={`${BASE_URL}/productImage/${JSON.parse(data.proImage)[0]}`}
-                            alt="Product Image"
-                            onClick={() => productDetails(data.product_id)}
-                          />
-                        )}
-                        <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
-                          Available
+              {products.length === 0 ? (
+                <p className="text-gray-600 text-center w-full">Currently you have no any products live in the website.</p>
+              ) : (
+                <div className="flex flex-wrap justify-center gap-3 h-auto w-full">
+                  {products.map(data => (
+                    <div className="flex flex-col bg-white rounded overflow-hidden w-[300px]" key={data.product_id}>
+                      <div className="relative">
+                        <div className="cursor-pointer">
+                          {JSON.parse(data.proImage)[0] && (
+                            <img
+                              className="w-full"
+                              src={`${BASE_URL}/productImage/${JSON.parse(data.proImage)[0]}`}
+                              alt="Product Image"
+                              onClick={() => productDetails(data.product_id)}
+                            />
+                          )}
+                          <div className="absolute top-0 right-0 bg-yellow-500 text-white px-2 py-1 m-2 rounded text-sm font-medium">
+                            Available
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-lg font-medium mb-1">{data.productName}</h3>
+                        <p className="text-gray-800 text-sm mb-4">
+                          {data.type}
+                        </p>
+                        {(() => {
+                          const postDate = new Date(data.submitted);
+                          const durationInDays = data.days || 0;
+
+                          if (isNaN(postDate.getTime())) {
+                            return <p className="text-red-800 text-[13px]">Invalid date</p>;
+                          }
+
+                          const endDate = new Date(postDate);
+                          endDate.setDate(endDate.getDate() + durationInDays);
+
+                          const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                          const day = String(endDate.getDate()).padStart(2, '0');
+                          const year = endDate.getFullYear();
+                          let hours = endDate.getHours();
+                          const minutes = String(endDate.getMinutes()).padStart(2, '0');
+                          const ampm = hours >= 12 ? 'PM' : 'AM';
+                          hours = hours % 12 || 12;
+
+                          const formatted = `${month}-${day}-${year}, ${hours}:${minutes} ${ampm}`;
+
+                          if (endDate < new Date()) {
+                            return <p className="text-red-800 text-[13px] font-semibold">Auction Ended</p>;
+                          }
+                          return <p className="text-red-800 text-[13px]">Ends at {formatted}</p>;
+                        })()}
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-lg">Rs.{data.price}</span>
+                          <div className="flex gap-2">
+                            <button className="bg-green-800 text-gray-100 border border-gray-400 rounded-[6px] py-2 px-4 text-[13px] hover:bg-green-700 outline-none cursor-pointer" onClick={() => gotoUpdate(data.product_id)}>
+                              Update
+                            </button>
+                            <button className="bg-red-800 text-gray-100 border border-gray-400 rounded-[6px] py-2 px-4 text-[13px] hover:bg-red-700 outline-none cursor-pointer" onClick={() => deleteProduct(data.product_id)}>
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <div className="p-4">
-                      <h3 className="text-lg font-medium mb-1">{data.productName}</h3>
-                      <p className="text-gray-800 text-sm mb-4">
-                        {data.type}
-                      </p>
-                      {(() => {
-                        const postDate = new Date(data.submitted);
-                        const durationInDays = data.days || 0;
-
-                        if (isNaN(postDate.getTime())) {
-                          return <p className="text-red-800 text-[13px]">Invalid date</p>;
-                        }
-
-                        const endDate = new Date(postDate);
-                        endDate.setDate(endDate.getDate() + durationInDays);
-
-                        const month = String(endDate.getMonth() + 1).padStart(2, '0');
-                        const day = String(endDate.getDate()).padStart(2, '0');
-                        const year = endDate.getFullYear();
-                        let hours = endDate.getHours();
-                        const minutes = String(endDate.getMinutes()).padStart(2, '0');
-                        const ampm = hours >= 12 ? 'PM' : 'AM';
-                        hours = hours % 12 || 12;
-
-                        const formatted = `${month}-${day}-${year}, ${hours}:${minutes} ${ampm}`;
-
-                        if (endDate < new Date()) {
-                          return <p className="text-red-800 text-[13px] font-semibold">Auction Ended</p>;
-                        }
-                        return <p className="text-red-800 text-[13px]">Ends at {formatted}</p>;
-                      })()}
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-lg">Rs.{data.price}</span>
-                        <div className="flex gap-2">
-                          <button className="bg-green-800 text-gray-100 border border-gray-400 rounded-[6px] py-2 px-4 text-[13px] hover:bg-green-700 outline-none cursor-pointer" onClick={() => gotoUpdate(data.product_id)}>
-                            Update
-                          </button>
-                          <button className="bg-red-800 text-gray-100 border border-gray-400 rounded-[6px] py-2 px-4 text-[13px] hover:bg-red-700 outline-none cursor-pointer" onClick={() => deleteProduct(data.product_id)}>
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div
