@@ -366,47 +366,89 @@ app.post('/userProfile', (req, res) => {
 });
 
 // route to update user profile 
-app.post('/updateUser/:id', upload.single('profile_pic'), (req, res) => {
-    try {
-        const userData = JSON.parse(req.body.user);
-        const {
-            user_name, user_email, user_state,
-            user_district, user_street, user_phone
-        } = userData;
+app.post('/updateUser', upload.single('user_profile'), async (req, res) => {
+  try {
+    const {
+      user_id,
+      user_name,
+      user_email,
+      user_password,
+      user_state,
+      user_district,
+      user_street,
+      user_phone
+    } = req.body;
 
-        const profilePic = req.file ? req.file.filename : null;
+    const user_profile = req.file ? req.file.filename : null;
 
-        let sql = `
+    const fieldsToUpdate = [];
+    const params = [];
+
+    if (user_name) {
+      fieldsToUpdate.push('user_name = ?');
+      params.push(user_name);
+    }
+
+    if (user_email) {
+      fieldsToUpdate.push('user_email = ?');
+      params.push(user_email);
+    }
+
+    if (user_password) {
+      const hashedPassword = await bcrypt.hash(user_password, 10);
+      fieldsToUpdate.push('user_pass = ?');
+      params.push(hashedPassword);
+    }
+
+    if (user_state) {
+      fieldsToUpdate.push('user_state = ?');
+      params.push(user_state);
+    }
+
+    if (user_district) {
+      fieldsToUpdate.push('user_district = ?');
+      params.push(user_district);
+    }
+
+    if (user_street) {
+      fieldsToUpdate.push('user_street = ?');
+      params.push(user_street);
+    }
+
+    if (user_phone) {
+      fieldsToUpdate.push('user_phone = ?');
+      params.push(user_phone);
+    }
+
+    if (user_profile) {
+      fieldsToUpdate.push('user_profile = ?');
+      params.push(user_profile);
+    }
+
+    if (!fieldsToUpdate.length) {
+      return res.status(400).json({ error: 'No fields provided for update' });
+    }
+
+    const sql = `
       UPDATE user_signup
-      SET user_name = ?, user_email = ?, user_state = ?, 
-          user_district = ?, user_street = ?, user_phone = ?
-      ${profilePic ? ', user_profile = ?' : ''}
+      SET ${fieldsToUpdate.join(', ')}
       WHERE user_id = ?
     `;
 
-        const params = [
-            user_name,
-            user_email,
-            user_state,
-            user_district,
-            user_street,
-            user_phone,
-            ...(profilePic ? [profilePic] : []),
-            id
-        ];
+    params.push(user_id);
 
-        db.query(sql, params, (err, result) => {
-            if (err) {
-                console.error("Update error:", err);
-                return res.status(500).json({ error: 'Database update failed' });
-            }
+    db.query(sql, params, (err, result) => {
+      if (err) {
+        console.error("Update error:", err);
+        return res.status(500).json({ error: 'Database update failed' });
+      }
 
-            res.json({ message: 'User updated successfully', result });
-        });
-    } catch (error) {
-        console.error('Update processing error:', error);
-        res.status(400).json({ error: 'Invalid user data' });
-    }
+      res.json({ message: 'User updated successfully', result });
+    });
+  } catch (error) {
+    console.error('Update processing error:', error);
+    res.status(400).json({ error: 'Invalid user data' });
+  }
 });
 
 

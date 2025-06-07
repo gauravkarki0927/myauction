@@ -34,8 +34,8 @@ function Recipts() {
                             <td className="py-3 px-6 text-left">{record.district}</td>
                             <td className="py-3 px-6 text-left">{record.street}</td>
                             <td className="py-3 px-6 text-left">{record.postal_code}</td>
-                            <td className="py-3 px-6 text-left">{record.product || "—"}</td>
-                            <td className="py-3 px-6 text-left font-semibold text-green-700">{record.total || "Rs 0.00"}</td>
+                            <td className="py-3 px-6 text-left">{record.pid || "—"}</td>
+                            <td className="py-3 px-6 text-left font-semibold text-green-700">{record.price || "Rs 0.00"}</td>
                             <td className="py-3 px-6 text-left">{record.payment_id}</td>
                         </tr>
                     ))}

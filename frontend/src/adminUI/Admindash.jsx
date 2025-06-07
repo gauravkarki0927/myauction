@@ -122,7 +122,7 @@ function Admindash() {
     const handleUserSearch = (e) => {
         e.preventDefault();
         if (!userSearch.trim()) {
-            setFilteredUsers([]); // Hide table if input is empty
+            setFilteredUsers([]);
             return;
         }
         const result = users.filter((u) =>
@@ -314,7 +314,7 @@ function Admindash() {
                                 }`} >
                             <div className="w-full">
                                 <div className="flex flex-wrap md:flex-nowrap bg-gray-100 p-2 justify-between gap-2 mb-4">
-                                    <div className="bg-white w-full sm:w-1/2 md:w-1/4 rounded p-2">
+                                    <div className="bg-red-500 text-gray-100 w-full sm:w-1/2 md:w-1/4 rounded p-2">
                                         <p className="text-xs sm:text-sm md:text-[14px]">Total user</p>
                                         <h1 className="text-sm sm:text-md md:text-[18px] font-semibold px-2 sm:px-4">
                                             {data.user_count} in total
@@ -326,7 +326,7 @@ function Admindash() {
                                         </div>
                                     </div>
 
-                                    <div className="bg-white w-full sm:w-1/2 md:w-1/4 rounded p-2">
+                                    <div className="bg-green-500 text-gray-100 w-full sm:w-1/2 md:w-1/4 rounded p-2">
                                         <p className="text-xs sm:text-sm md:text-[14px]">Total product</p>
                                         <h1 className="text-sm sm:text-md md:text-[18px] font-semibold px-2 sm:px-4">
                                             {data.product_count} in total
@@ -338,7 +338,7 @@ function Admindash() {
                                         </div>
                                     </div>
 
-                                    <div className="bg-white w-full sm:w-1/2 md:w-1/4 rounded p-2">
+                                    <div className="bg-blue-500 text-gray-100 w-full sm:w-1/2 md:w-1/4 rounded p-2">
                                         <p className="text-xs sm:text-sm md:text-[14px]">Total reviews</p>
                                         <h1 className="text-sm sm:text-md md:text-[18px] font-semibold px-2 sm:px-4">
                                             {data.review_count} in total
@@ -350,7 +350,7 @@ function Admindash() {
                                         </div>
                                     </div>
 
-                                    <div className="bg-white w-full sm:w-1/2 md:w-1/4 rounded p-2">
+                                    <div className="bg-yellow-500 text-gray-100 w-full sm:w-1/2 md:w-1/4 rounded p-2">
                                         <p className="text-xs sm:text-sm md:text-[14px]">Total ratio</p>
                                         <h1 className="text-sm sm:text-md md:text-[18px] font-semibold px-2 sm:px-4">
                                             {total_ratio()} in total

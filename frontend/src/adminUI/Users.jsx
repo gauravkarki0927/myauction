@@ -2,14 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import img1 from '../pictures/user.jpg';
 import API from '../api/API';
 import { BASE_URL } from '../api/BaseUrrlForImage';
+import toast from 'react-hot-toast'
 
-function Users() {
-
+function Tets() {
     const [activeSection, setActiveSection] = useState('records');
     const [profilePicSrc, setProfilePicSrc] = useState(img1);
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [formData, setFormData] = useState({});
 
+    const inputFileRef = useRef(null);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -17,19 +19,40 @@ function Users() {
                 const response = await API.get('/users');
                 setUsers(response.data);
             } catch (err) {
-                alert('Error fetching users:', err);
+                toast.error('Error fetching data!', {position: "top-right"});
             }
         };
 
         fetchUsers();
     }, []);
 
-    const inputFileRef = useRef(null);
+    useEffect(() => {
+        if (selectedUser) {
+            setFormData({ ...selectedUser });
+            setProfilePicSrc(
+                selectedUser.user_profile
+                    ? `${BASE_URL}/uploads/${selectedUser.user_profile}`
+                    : img1
+            );
+        }
+    }, [selectedUser]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
             setProfilePicSrc(URL.createObjectURL(file));
+            setFormData((prev) => ({
+                ...prev,
+                user_profile_file: file,
+            }));
         }
     };
 
@@ -44,31 +67,44 @@ function Users() {
         }
     };
 
-
     const handleDeleteClick = async (userId) => {
-        const smt = confirm("Are you sure you want to delete this user?");
-        if (smt) {
+        const confirmDelete = confirm("Are you sure you want to delete this user?");
+        if (confirmDelete) {
             try {
                 const response = await API.delete(`/delete/${userId}`);
-
-                if (response.ok) {
-                    const data = response.data;
-                    alert(data.message);
-                } else {
-                    const errorData = response.data;
-                    alert('Error deleting user:', errorData.error || errorData.message);
-                }
+                toast.success(response.data.message || 'User deleted successfully', {position: "top-right"});
+                setUsers(users.filter(user => user.user_id !== userId));
             } catch (error) {
-                alert('Network error:', error);
+                alert('Error deleting user');
             }
+        }
+    };
+
+    const handleFormSubmit = async (e) => {
+        e.preventDefault();
+
+        const form = new FormData();
+        for (const key in formData) {
+            form.append(key, formData[key]);
+        }
+
+        try {
+            const response = await API.post('/updateUser', formData);
+            if (response.status = 200) {
+                toast.success('User updated successfully', {position: "top-right"});
+                setActiveSection('records');
+
+                const updatedUsers = await API.get('/users');
+                setUsers(updatedUsers.data);
+            }
+        } catch (err) {
+                toast.error('Update failed. Please try again.', {position: "top-right"});
         }
     };
 
     return (
         <>
-            <div id="records" className={`overflow-x-auto bg-white p-2 ${activeSection === 'records' ? 'block' : 'hidden'
-                }`}
-            >
+            <div id="records" className={`overflow-x-auto bg-white p-2 ${activeSection === 'records' ? 'block' : 'hidden'}`}>
                 <table className="w-full table-auto">
                     <thead>
                         <tr className="bg-gray-200 text-gray-800 uppercase text-sm leading-normal">
@@ -115,19 +151,18 @@ function Users() {
                     </tbody>
                 </table>
             </div>
-            <div id="edit" className={`p-2 ${activeSection === 'edit' ? 'block' : 'hidden'
-                }`}
-            >
+
+            <div id="edit" className={`p-2 ${activeSection === 'edit' ? 'block' : 'hidden'}`}>
                 <div className="flex flex-col md:flex-row">
                     <main className="flex-1">
-                        { selectedUser && (
-                            <form className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2">
+                        {selectedUser && (
+                            <form onSubmit={handleFormSubmit} className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2">
                                 <div className="flex flex-wrap justify-around w-full">
                                     <div className="w-full md:w-1/4 mb-6 md:mb-0">
                                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
                                         <div className="flex flex-col items-center px-4">
                                             <div className="w-36 h-42 rounded overflow-hidden mb-4">
-                                                <img src={selectedUser.user_profile ? `${BASE_URL}/uploads/${selectedUser.user_profile}` : profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
+                                                <img src={profilePicSrc} alt="User Avatar" className="w-full h-full object-cover" />
                                             </div>
 
                                             <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">
@@ -142,21 +177,21 @@ function Users() {
                                                 <label
                                                     htmlFor="image"
                                                     className="text-gray-600 border border-gray-200 px-16 py-1 bg-white outline-none cursor-pointer text-[13px] font-semibold rounded-md"
+                                                    onClick={handleUploadClick}
                                                 >
                                                     Upload Photo
                                                 </label>
                                             </div>
-
                                         </div>
                                         <div className="px-4 py-2">
                                             <div>
                                                 <label className="block text-sm font-medium text-[#1b1b1ee6] my-2">User Login</label>
                                                 <input
-                                                    name="email"
+                                                    name="user_email"
                                                     type="email"
                                                     placeholder="login email"
-                                                    value={selectedUser.user_email}
-                                                    onChange={handleFileChange}
+                                                    value={formData.user_email || ''}
+                                                    onChange={handleInputChange}
                                                     className="w-full border-gray-300 text-[14px] placeholder:text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                                                 />
                                             </div>
@@ -166,11 +201,13 @@ function Users() {
                                                     name="password"
                                                     type="password"
                                                     placeholder="********"
+                                                    onChange={handleInputChange}
                                                     className="w-full border-gray-300 placeholder:text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                                                 />
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="w-full md:w-3/4 space-y-8">
                                         <div>
                                             <div className="flex justify-between items-center">
@@ -183,41 +220,43 @@ function Users() {
                                                 <div>
                                                     <label className="block text-sm font-medium text-[#1b1b1ee6]">Username</label>
                                                     <input
-                                                        name="user"
+                                                        name="user_name"
                                                         type="text"
+                                                        value={formData.user_name || ''}
+                                                        onChange={handleInputChange}
                                                         className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                                                        value={selectedUser.user_name}
-                                                        onChange={handleFileChange}
                                                     />
+                                                    <input type="hidden" name="user_id" value={users.user_id}
+                                                        onChange={handleInputChange} />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-[#1b1b1ee6]">State</label>
                                                     <input
-                                                        name="state"
+                                                        name="user_state"
                                                         type="text"
+                                                        value={formData.user_state || ''}
+                                                        onChange={handleInputChange}
                                                         className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                                                        value={selectedUser.user_state}
-                                                        onChange={handleFileChange}
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-[#1b1b1ee6]">District</label>
                                                     <input
-                                                        name="district"
+                                                        name="user_district"
                                                         type="text"
+                                                        value={formData.user_district || ''}
+                                                        onChange={handleInputChange}
                                                         className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                                                        value={selectedUser.user_district}
-                                                        onChange={handleFileChange}
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-[#1b1b1ee6]">Street/Village</label>
                                                     <input
-                                                        name="street"
+                                                        name="user_street"
                                                         type="text"
+                                                        value={formData.user_street || ''}
+                                                        onChange={handleInputChange}
                                                         className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                                                        value={selectedUser.user_street}
-                                                        onChange={handleFileChange}
                                                     />
                                                 </div>
                                             </div>
@@ -228,34 +267,40 @@ function Users() {
                                                 <div>
                                                     <label className="block text-sm font-medium text-[#1b1b1ee6]">Contact</label>
                                                     <input
-                                                        name="phone"
+                                                        name="user_phone"
                                                         type="text"
+                                                        value={formData.user_phone || ''}
+                                                        onChange={handleInputChange}
                                                         className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                                                        value={selectedUser.user_phone}
-                                                        onChange={handleFileChange}
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-[#1b1b1ee6]">Postal</label>
                                                     <input
-                                                        name="postal"
+                                                        name="user_postal"
                                                         type="text"
+                                                        value={formData.user_postal || ''}
+                                                        onChange={handleInputChange}
                                                         className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-[#1b1b1ee6]">WhatsApp</label>
                                                     <input
-                                                        name="social1"
+                                                        name="whatsapp"
                                                         type="text"
+                                                        value={formData.whatsapp || ''}
+                                                        onChange={handleInputChange}
                                                         className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-[#1b1b1ee6]">Website</label>
                                                     <input
-                                                        name="social2"
+                                                        name="website"
                                                         type="text"
+                                                        value={formData.website || ''}
+                                                        onChange={handleInputChange}
                                                         className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
                                                     />
                                                 </div>
@@ -267,14 +312,17 @@ function Users() {
                                     <h3 className="text-lg font-semibold text-gray-800 mb-2">About the User</h3>
                                     <textarea
                                         name="bio"
+                                        value={formData.bio || ''}
+                                        onChange={handleInputChange}
                                         className="w-full mt-1 border-gray-300 text-gray-700 text-[14px] outline-none p-2 rounded border border-gray-50 resize-none"
                                         rows="4"
-                                    >
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                    </textarea>
+                                    ></textarea>
                                 </div>
                                 <div className="my-2 flex justify-end items-center">
-                                    <button type="submit" className="border border-gray-200 px-4 py-2 bg-black text-white outline-none cursor-pointer text-[13px] font-semibold rounded-md">
+                                    <button
+                                        type="submit"
+                                        className="border border-gray-200 px-4 py-2 bg-black text-white outline-none cursor-pointer text-[13px] font-semibold rounded-md"
+                                    >
                                         Update
                                     </button>
                                 </div>
@@ -284,7 +332,7 @@ function Users() {
                 </div>
             </div>
         </>
-    )
+    );
 }
 
-export default Users
+export default Tets;

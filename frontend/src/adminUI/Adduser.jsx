@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import API from '../api/API';
+import toast from 'react-hot-toast'
 
 function Adduser() {
 
@@ -284,10 +285,10 @@ function Adduser() {
                     },
                 })
                 .then((res) => {
-                    alert('User added Successful');
+                    toast.success('User added successfully', { position: "top-right" });
                 })
                 .catch((err) => {
-                    alert('Failed to add user. Please try again.');
+                    toast.error('Failed to add user. Please try again.', {position: "top-right"});
                     console.log(err);
                 });
         }

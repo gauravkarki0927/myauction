@@ -5,6 +5,7 @@ import Navigation from './Navigation';
 import Footer from '../Footer';
 import user_img from '../../pictures/user.jpg';
 import { BASE_URL } from '../../api/BaseUrrlForImage.js';
+import toast from 'react-hot-toast'
 
 function Profile() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -61,7 +62,9 @@ function Profile() {
         });
         if (response.data.length > 0) {
           setUser(response.data[0]);
+          setFormData(response.data[0]);
         }
+
       } catch (err) {
         console.error("Error fetching user:", err);
       }
@@ -69,6 +72,31 @@ function Profile() {
 
     fetchProduct();
   }, [user]);
+
+  const [formData, setFormData] = useState({});
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+
+      const response = await API.post('/updateUser', formData);
+
+      if (response.status === 200) {
+        toast.success("Profile updated successfully", {position: "top-right"});
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+      alert("Update failed.");
+    }
+  };
+
 
 
   return (
@@ -228,7 +256,7 @@ function Profile() {
               </div>
             )}
             {activeTab === 'settings' && (
-              <form className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2">
+              <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md px-4 sm:px-6 py-2">
                 <div className="flex flex-wrap justify-around w-full">
                   <div className="w-full md:w-1/4 mb-6 md:mb-0">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h3>
@@ -239,6 +267,7 @@ function Profile() {
 
                       <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">
                         <input
+                          name="user_profile"
                           type="file"
                           accept="image/*"
                           ref={inputFileRef}
@@ -258,19 +287,22 @@ function Profile() {
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6] my-2">User Login</label>
                         <input
-                          name="email"
+                          name="user_email"
                           type="email"
                           placeholder="Your login email"
-                          value={user.user_email}
+                          value={formData.user_email || ""}
+                          onChange={handleInputChange}
                           className="w-full border-gray-300 placeholder:text-[14px] text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6] my-2">User Password</label>
                         <input
-                          name="password"
+                          name="user_password"
                           type="password"
                           placeholder="Your password.."
+                          value={formData.user_password || ""}
+                          onChange={handleInputChange}
                           className="w-full border-gray-300 placeholder:text-[14px] text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                         />
                       </div>
@@ -283,38 +315,40 @@ function Profile() {
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Username</label>
                           <input
-                            name="user"
+                            name="user_name"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value={user.user_name}
-                          />
+                            value={formData.user_name || ""}
+                            onChange={handleInputChange} />
+                          <input type="hidden" name="user_id" value={user}
+                            onChange={handleInputChange} />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">State</label>
                           <input
-                            name="state"
+                            name="user_state"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value={user.user_state}
-                          />
+                            value={formData.user_state || ""}
+                            onChange={handleInputChange} />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">District</label>
                           <input
-                            name="district"
+                            name="user_district"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value={user.user_district}
-                          />
+                            value={formData.user_district || ""}
+                            onChange={handleInputChange} />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Street/Village</label>
                           <input
-                            name="street"
+                            name="user_street"
                             type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value={user.user_street}
-                          />
+                            value={formData.user_street || ""}
+                            onChange={handleInputChange} />
                         </div>
                       </div>
                     </div>
@@ -324,11 +358,11 @@ function Profile() {
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Contact</label>
                           <input
-                            name="postal"
-                            type="postal"
+                            name="user_phone"
+                            type="text"
                             className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                            value={user.user_phone}
-                          />
+                            value={formData.user_phone || ""}
+                            onChange={handleInputChange} />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-[#1b1b1ee6]">Postal</label>

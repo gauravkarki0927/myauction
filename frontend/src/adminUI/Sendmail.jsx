@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import API from '../api/API.js';
+import toast from 'react-hot-toast'
 
 const Sendmail = () => {
   const [to, setTo] = useState(['']);
@@ -81,17 +82,17 @@ const Sendmail = () => {
       const data = await response.data;
 
       if (data.success) {
-        alert('Email sent successfully!');
+        toast.success('Email sent successfully', { position: "top-right" });
         setTo(['']);
         setSubject('');
         setBody('');
         setAttachments([]);
         setErrors({});
       } else {
-        alert('Failed to send email: ' + data.message);
+        toast.error(('Failed to send email: ' + data.message), { position: "top-right" });
       }
     } catch (error) {
-      alert('Error sending email: ' + error.message);
+      toast.error(('Error sending email: ' + error.message), { position: "top-right" });
     }
   };
 

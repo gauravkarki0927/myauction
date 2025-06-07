@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
 import API from '../api/API';
+import toast from 'react-hot-toast'
 
 function Addproduct() {
 
@@ -107,9 +106,6 @@ function Addproduct() {
     setFormData({ ...formData, keypoints: updatedKeypoints });
   };
 
-
-  const navigate = useNavigate();
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
@@ -125,10 +121,10 @@ function Addproduct() {
           },
         })
         .then((res) => {
-          alert('Product added Successful');
+          toast.success('Product added Successful', {position: "top-right"});
         })
         .catch((err) => {
-          alert('Product added failed. Please try again.');
+          toast.error('Product added failed. Please try again.', {position: "top-right"});
           console.log(err);
         });
     } else {

@@ -60,7 +60,7 @@ function Winner() {
                                     <td className="py-3 px-6 text-left">{winner.type}</td>
                                     <td className="py-3 px-6 text-left">{winner.price}</td>
                                     <td className="py-3 px-6 text-left">
-                                        {new Date(winner.submitted).toLocaleString('en-US', {
+                                        {new Date(winner.recorded).toLocaleString('en-US', {
                                             weekday: 'short',
                                             year: 'numeric',
                                             month: 'short',

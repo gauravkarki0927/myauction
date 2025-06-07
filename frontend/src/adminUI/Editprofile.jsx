@@ -2,12 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import user_img from '../pictures/user.jpg';
 import { BASE_URL } from '../api/BaseUrrlForImage.js';
 import API from '../api/API.js';
+import toast from 'react-hot-toast'
 
 function Editprofile({ ussid }) {
   const [profilePicSrc, setProfilePicSrc] = useState(user_img);
   const inputFileRef = useRef(null);
-
-  const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -26,12 +25,14 @@ function Editprofile({ ussid }) {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await API.post(`/userProfile`, {
+        const response = await API.post("/userProfile", {
           userId: ussid,
         });
         if (response.data.length > 0) {
           setUser(response.data[0]);
+          setFormData(response.data[0]);
         }
+
       } catch (err) {
         console.error("Error fetching user:", err);
       }
@@ -40,25 +41,27 @@ function Editprofile({ ussid }) {
     fetchProduct();
   }, [ussid]);
 
+  const [formData, setFormData] = useState({});
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const formData = new FormData();
-    formData.append('user', JSON.stringify(user));
-    if (selectedFile) {
-      formData.append('profile_pic', selectedFile);
-    }
-
     try {
-      const response = await API.post(`${API}/updateUser`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      if(response.status == 200){
-              alert("Profile updated successfully!");
+
+      const response = await API.post('/updateUser', formData);
+
+      if (response.status === 200) {
+        toast.success("Profile updated successfully", {position: "top-right"});
       }
-    } catch (error) {
-      console.error("Error updating user:", error);
-      alert("Failed to update profile.");
+    } catch (err) {
+      console.error("Update error:", err);
+      toast.success("Profile updated failed!", {position: "top-right"});
     }
   };
 
@@ -78,6 +81,7 @@ function Editprofile({ ussid }) {
 
                     <div className="w-full flex justify-center items-center h-12 rounded border border-gray-200 bg-gray-100">
                       <input
+                        name="user_profile"
                         type="file"
                         accept="image/*"
                         ref={inputFileRef}
@@ -97,20 +101,22 @@ function Editprofile({ ussid }) {
                     <div>
                       <label className="block text-sm font-medium text-[#1b1b1ee6] my-2">User Login</label>
                       <input
-                        name="email"
+                        name="user_email"
                         type="email"
                         placeholder="Your login email"
-                        value={user.user_email || ""}
-                        onChange={(e) => setUser({ ...user, user_email: e.target.value })}
+                        value={formData.user_email || ""}
+                        onChange={handleInputChange}
                         className="w-full border-gray-300 placeholder:text-[14px] text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-[#1b1b1ee6] my-2">User Password</label>
                       <input
-                        name="password"
+                        name="user_password"
                         type="password"
                         placeholder="Your password.."
+                        value={formData.user_password || ""}
+                        onChange={handleInputChange}
                         className="w-full border-gray-300 placeholder:text-[14px] text-[14px] outline-none px-2 py-1 rounded border border-gray-50"
                       />
                     </div>
@@ -123,42 +129,40 @@ function Editprofile({ ussid }) {
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6]">Username</label>
                         <input
-                          name="user"
+                          name="user_name"
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_name || ""}
-                          onChange={(e) => setUser({ ...user, user_name: e.target.value })}
-                        />
+                          value={formData.user_name || ""}
+                          onChange={handleInputChange} />
+                        <input type="hidden" name="user_id" value={ussid}
+                          onChange={handleInputChange} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6]">State</label>
                         <input
-                          name="state"
+                          name="user_state"
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_state || ""}
-                          onChange={(e) => setUser({ ...user, user_state: e.target.value })}
-                        />
+                          value={formData.user_state || ""}
+                          onChange={handleInputChange} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6]">District</label>
                         <input
-                          name="district"
+                          name="user_district"
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_district || ""}
-                          onChange={(e) => setUser({ ...user, user_district: e.target.value })}
-                        />
+                          value={formData.user_district || ""}
+                          onChange={handleInputChange} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6]">Street/Village</label>
                         <input
-                          name="street"
+                          name="user_street"
                           type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_street || ""}
-                          onChange={(e) => setUser({ ...user, user_street: e.target.value })}
-                        />
+                          value={formData.user_street || ""}
+                          onChange={handleInputChange} />
                       </div>
                     </div>
                   </div>
@@ -168,12 +172,11 @@ function Editprofile({ ussid }) {
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6]">Contact</label>
                         <input
-                          name="postal"
-                          type="postal"
+                          name="user_phone"
+                          type="text"
                           className="w-full mt-1 border-gray-300 outline-none p-2 rounded text-[14px] border border-gray-50"
-                          value={user.user_phone || ""}
-                          onChange={(e) => setUser({ ...user, user_phone: e.target.value })}
-                        />
+                          value={formData.user_phone || ""}
+                          onChange={handleInputChange} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-[#1b1b1ee6]">Postal</label>
@@ -206,10 +209,12 @@ function Editprofile({ ussid }) {
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">About the User</h3>
                 <textarea
+                  name="bio"
                   className="w-full mt-1 border-gray-300 text-gray-700 text-[14px] outline-none p-2 rounded border border-gray-50 resize-none"
                   rows="4"
-                  defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-                />
+                >
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                </textarea>
               </div>
               <div className="my-2 flex justify-end items-center">
                 <button type="submit" className="border border-gray-200 px-4 py-2 bg-black text-white outline-none cursor-pointer text-[13px] font-semibold rounded-md">
