@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Related from "./Related";
 import Footer from "./Footer";
-import axios from 'axios'
 import Nav from "./Nav";
 import Filter from "./Filter";
 import API from "../api/API";
@@ -21,7 +20,7 @@ function Productdetails() {
             try {
                 const response = await API.get(`/productDetails/${productId}`);
 
-                if (response.ok) {
+                if (response.status == 200) {
                     const data = await response.data;
                     const productData = data[0];
                     setProduct(productData);

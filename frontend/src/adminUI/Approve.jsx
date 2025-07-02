@@ -27,12 +27,11 @@ function Approve() {
             try {
                 const response = await API.put(`/approvePro/${proID}`);
 
-                if (response.ok) {
+                if (response.status == 200) {
                     const data = response.data;
                     toast.success(data.message, { position: "top-right" });
                 } else {
-                    const errorData = response.data;
-                    alert('Error approving post: ' + (errorData.error || errorData.message));
+                    alert('Error approving post: ');
                 }
             } catch (error) {
                 alert('Network error: ' + error.message);

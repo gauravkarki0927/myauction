@@ -1,35 +1,58 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import API from '../api/API';
 
 function Contact() {
     const [msg, setMsg] = useState('');
     const [user, setUser] = useState({
         to: "",
-        subject:"",
+        subject: "",
         message: ""
-    
+
     });
 
+    const [errors, setErrors] = useState({});
     const [status, setStatus] = useState('');
 
-    const onInputChange = e =>{
-        setUser({...user, [e.target.name]: e.target.value});
+    const onInputChange = e => {
+        setUser({ ...user, [e.target.name]: e.target.value });
     };
+
+    const validateForm = () => {
+        let isValid = true;
+        const newErrors = {};
+
+        if (!user.to.trim()) {
+            newErrors.to = 'User Name is required';
+            isValid = false;
+        }
+        if (!user.subject.trim()) {
+            newErrors.subject = 'User Email is required';
+            isValid = false;
+        }
+        if (!user.message.trim()) {
+            newErrors.message = 'User message is required';
+            isValid = false;
+        }
+
+        setErrors(newErrors);
+        return isValid;
+    }
 
     const onSubmit = async (e) => {
         e.preventDefault();
-    
-        try {
-            const response = await API.post(`/sendMail`, user);
-            setStatus(response.data.status);
-            setMsg(response.data.respMesg);
-        } catch (error) {
-            setStatus(false);
-            setMsg("Network error try again later!");
+        if (validateForm()) {
+            try {
+                const response = await API.post(`/sendMail`, user);
+                setStatus(response.data.status);
+                setMsg(response.data.respMesg);
+            } catch (error) {
+                setStatus(false);
+                setMsg("Network error try again later!");
+            }
         }
     };
-    
-    
+
+
 
     return (
         <>
@@ -45,7 +68,7 @@ function Contact() {
                                 Get in Touch
                             </h2>
                             <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-900">Let us know your concern
-                                
+
                             </p>
                         </div>
                     </div>
@@ -119,13 +142,19 @@ function Contact() {
                                         <div className="mx-0 mb-1 sm:mb-4">
                                             <div className="mx-0 mb-1 sm:mb-4">
                                                 <label htmlFor="name" className="pb-1 text-gray-800 text-xs uppercase tracking-wider"></label><input onChange={onInputChange} type="text" name="subject" autoComplete="given-name" placeholder="Your name" className="mb-2 w-full outline-none rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md text-gray-900 sm:mb-0" />
+                                                {errors.to && <p className="mt-1 text-sm text-red-500">{errors.to}</p>}
+
                                             </div>
                                             <div className="mx-0 mb-1 sm:mb-4">
                                                 <label htmlFor="email" className="pb-1 text-gray-800 text-xs uppercase tracking-wider"></label><input onChange={onInputChange} type="email" name="to" autoComplete="email" placeholder="Your email address" className="mb-2 w-full outline-none rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md text-gray-900 sm:mb-0" />
+                                                {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject}</p>}
+
                                             </div>
                                         </div>
                                         <div className="mx-0 mb-1 sm:mb-4">
                                             <label htmlFor="textarea" className="pb-1 text-gray-800 text-xs uppercase tracking-wider"></label><textarea onChange={onInputChange} id="textarea" name="message" cols="30" rows="5" placeholder="Write your message..." className="mb-2 w-full outline-none rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md text-gray-900 sm:mb-0"></textarea>
+                                            {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
+
                                         </div>
                                     </div>
                                     <div className="text-center">

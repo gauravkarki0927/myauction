@@ -196,18 +196,20 @@ function Myitems() {
           },
         });
 
-        const data = await response.json();
+        const data = response.data;
 
-        if (response.ok) {
+        if (response.status === 200 || response.status === 201) {
           alert(data.message);
         } else {
           alert(`Error adding product: ${data.message || 'Something went wrong'}`);
         }
       } catch (error) {
+        console.error(error);
         alert('Network error occurred');
       }
     }
   };
+
 
   const [products, setProducts] = useState([]);
 

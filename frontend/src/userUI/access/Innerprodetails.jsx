@@ -22,8 +22,8 @@ function Innerprodetails() {
             try {
                 const response = await API.get(`/productDetails/${productId}`);
 
-                if (response.ok) {
-                    const data =  response.data;
+                if (response.status == 200) {
+                    const data = response.data;
 
                     const productData = data[0];
                     setProduct(productData);
@@ -32,7 +32,7 @@ function Innerprodetails() {
                         const parsedImages = JSON.parse(productData.proImage);
                         setImages(parsedImages);
 
-                        const initialImage = `${API}/productImage/${parsedImages[0]}`;
+                        const initialImage = `${BASE_URL}/productImage/${parsedImages[0]}`;
                         setMainImageSrc(initialImage);
                     } catch (err) {
                         console.error("Invalid JSON in proImage", err);
@@ -168,20 +168,21 @@ function Innerprodetails() {
         if (user_id) {
             if (!errorMessage && biddingAmount) {
                 try {
-                    const response = await API.post('/submitBid', {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                        body: JSON.stringify({
+                    const response = await API.post(
+                        '/submitBid',
+                        {
                             productId: productId,
                             userId: user_id,
                             amount: parseInt(biddingAmount, 10),
-                        }),
-                    });
+                        },
+                        {
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        }
+                    );
 
-                    const data = await response.json();
-
-                    if (response.ok) {
+                    if (response.status == 200) {
                         toast.success(("Bid submitted successfully."), { position: "top-right", autoClose: 7000 });
                     } else {
                         toast.error((data.message || "Bid submission failed."), { position: "top-right", autoClose: 5000 });
