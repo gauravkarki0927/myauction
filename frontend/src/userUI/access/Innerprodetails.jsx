@@ -60,9 +60,9 @@ function Innerprodetails() {
     const [remainingTime, setRemainingTime] = useState("");
 
     useEffect(() => {
-        if (!product.submitted || !product.days) return;
+        if (!product.recorded || !product.days) return;
 
-        const postDate = new Date(product.submitted);
+        const postDate = new Date(product.recorded);
         const endDate = new Date(postDate);
         endDate.setDate(endDate.getDate() + product.days);
 
@@ -107,28 +107,6 @@ function Innerprodetails() {
     };
 
 
-    const [biddingAmount, setBiddingAmount] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-
-    const handleKeyUp = (e) => {
-        const value = e.target.value;
-
-        if (value === "") {
-            setErrorMessage("Empty field.");
-        }
-        else if (!/^\d+$/.test(value)) {
-            setErrorMessage("Please enter a valid number.");
-        }
-        else if ((parseInt(value, 10) <= highestBid.highBid + 9) || (parseInt(value, 10) <= product.price + 9)) {
-            setErrorMessage("Please enter higher amount.");
-        }
-        else {
-            setErrorMessage("");
-        }
-
-        setBiddingAmount(value);
-    };
-
     let keyPointsList = [];
     try {
         keyPointsList = JSON.parse(product.keyPoints || '[]');
@@ -163,10 +141,42 @@ function Innerprodetails() {
         getUserData();
     }, []);
 
+    const [highestBid, setHighestBid] = useState(null);
+
+    useEffect(() => {
+        const highBids = async () => {
+            try {
+                const response = await API.get(`/highestBid/${productId}`);
+                setHighestBid(response.data);
+            } catch (err) {
+                console.error("Error fetching value:", err);
+                alert("Failed to fetch value.");
+            }
+        };
+        highBids();
+    }, [productId]);
+
+    const [biddingAmount, setBiddingAmount] = useState("");
+    useEffect(() => {
+        let bidToSubmit = 0;
+        let initialPrice = parseFloat(product.price);
+        const biddingAmount = (30 / 100 * initialPrice);
+
+        if (highestBid?.highBid != null) {
+            bidToSubmit = highestBid.highBid + biddingAmount;
+        } else {
+            bidToSubmit = initialPrice + biddingAmount;
+        }
+
+        if (bidToSubmit > 0) {
+            setBiddingAmount(Math.round(bidToSubmit));
+        }
+    }, [highestBid, product.price]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (user_id) {
-            if (!errorMessage && biddingAmount) {
+            if (biddingAmount) {
                 try {
                     const response = await API.post(
                         '/submitBid',
@@ -194,21 +204,6 @@ function Innerprodetails() {
             }
         }
     };
-
-    const [highestBid, setHighestBid] = useState(null);
-
-    useEffect(() => {
-        const highBids = async () => {
-            try {
-                const response = await API.get(`/highestBid/${productId}`);
-                setHighestBid(response.data);
-            } catch (err) {
-                console.error("Error fetching value:", err);
-                alert("Failed to fetch value.");
-            }
-        };
-        highBids();
-    }, [productId]);
 
     return (
         <>
@@ -250,7 +245,7 @@ function Innerprodetails() {
                                                 : "Price not available"
                                     }
                                 </span>
-                                <span className="text-[16px]">or Best Offer +10</span>
+                                <span className="text-[16px]">or Best Offer</span>
                             </div>
 
                             <p className="text-gray-700 mb-6">
@@ -271,30 +266,13 @@ function Innerprodetails() {
 
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-6">
-                                    <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">Bid your amount:</label>
-
-                                    <input
-                                        type="text"
-                                        id="biddingAmount"
-                                        name="biddingAmount"
-                                        placeholder="Rs."
-                                        value={biddingAmount}
-                                        onChange={(e) => setBiddingAmount(e.target.value)}
-                                        onKeyUp={handleKeyUp}
-                                        className={`w-20 border ${errorMessage ? "border-red-500" : "border-gray-300"
-                                            } px-4 text-center py-2 rounded outline-none`}
-                                    />
-
-                                    {errorMessage && (
-                                        <p className="text-red-600 text-sm my-2">{errorMessage}</p>
-                                    )}
-
+                                        <span className="text-[14px] italic font-medium"> Increase by 30% of the initial price</span>
                                 </div>
 
                                 <div className="flex space-x-4 mb-6">
                                     <button type="submit"
                                         className="bg-[#0e0e0f] flex gap-2 items-center text-white px-6 py-2 rounded outline-none cursor-pointer">
-                                        Submit
+                                        Place Your Bid
                                     </button>
                                     <a onClick={handleShare} className="bg-gray-200 flex gap-2 items-center cursor-pointer text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300 outline-none">Share
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 m-1 bg-transparent">

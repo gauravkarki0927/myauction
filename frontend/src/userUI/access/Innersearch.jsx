@@ -78,7 +78,7 @@ function Innersearch() {
 
     const renderProductCard = (data) => {
         const image = JSON.parse(data.proImage || '[]')[0];
-        const postDate = new Date(data.submitted);
+        const postDate = new Date(data.recorded);
         const durationInDays = data.days || 0;
         const endDate = new Date(postDate);
         endDate.setDate(endDate.getDate() + durationInDays);

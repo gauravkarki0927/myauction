@@ -42,8 +42,8 @@ function Outersearch() {
         navigate(`/product?pid=${PID}`);
     };
 
-    const renderEndDate = (submitted, durationInDays = 0) => {
-        const postDate = new Date(submitted);
+    const renderEndDate = (recorded, durationInDays = 0) => {
+        const postDate = new Date(recorded);
         if (isNaN(postDate.getTime())) {
             return <p className="text-red-800 text-[13px]">Invalid date</p>;
         }
@@ -113,7 +113,7 @@ function Outersearch() {
                                     <div className="p-4">
                                         <h3 className="text-lg font-medium mb-1">{data.productName}</h3>
                                         <p className="text-gray-800 text-sm mb-4">{data.type}</p>
-                                        {renderEndDate(data.submitted, data.days)}
+                                        {renderEndDate(data.recorded, data.days)}
                                         <div className="flex items-center justify-between mt-2">
                                             <span className="font-bold text-lg">Rs.{data.price}</span>
                                             <button

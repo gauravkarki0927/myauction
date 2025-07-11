@@ -108,29 +108,6 @@ function Productdetails() {
         }
     };
 
-
-    const [biddingAmount, setBiddingAmount] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-
-    const handleKeyUp = (e) => {
-        const value = e.target.value;
-
-        if (value === "") {
-            setErrorMessage("Empty field.");
-        }
-        else if (!/^\d+$/.test(value)) {
-            setErrorMessage("Please enter a valid number.");
-        }
-        else if ((parseInt(value, 10) <= highestBid.highBid + 9) || (parseInt(value, 10) <= product.price + 9)){
-            setErrorMessage("Please enter Rs.10 higher than amount.");
-        }
-        else {
-            setErrorMessage("");
-        }
-
-        setBiddingAmount(value);
-    };
-
     let keyPointsList = [];
     try {
         keyPointsList = JSON.parse(product.keyPoints || '[]');
@@ -219,31 +196,13 @@ function Productdetails() {
 
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-6">
-                                    <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">Bid your amount:</label>
-
-                                    <input
-                                        type="text"
-                                        id="biddingAmount"
-                                        name="biddingAmount"
-                                        placeholder="Rs"
-                                        value={biddingAmount}
-                                        onChange={(e) => setBiddingAmount(e.target.value)}
-                                        onKeyUp={handleKeyUp}
-                                        className={`w-20 border ${errorMessage ? "border-red-500" : "border-gray-300"
-                                            } px-4 text-center py-2 rounded outline-none`}
-                                        required
-                                    />
-
-                                    {errorMessage && (
-                                        <p className="text-red-600 text-sm my-2">{errorMessage}</p>
-                                    )}
-
+                                        <span className="text-[14px] italic font-medium"> Increase by 30% of the initial price</span>
                                 </div>
 
                                 <div className="flex space-x-4 mb-6">
                                     <button type="submit"
                                         className="bg-[#0e0e0f] flex gap-2 items-center text-white px-6 py-2 rounded outline-none cursor-pointer">
-                                        Submit
+                                        Place Your Bid
                                     </button>
                                     <a onClick={handleShare} className="bg-gray-200 flex gap-2 items-center cursor-pointer text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300 outline-none">Share
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 m-1 bg-transparent">
