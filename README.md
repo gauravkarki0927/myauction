@@ -21,7 +21,7 @@ An **Online Auction System** built with modern web technologies that allows user
   - Admin dashboard for managing all users and auctions.
 
 - **Responsive UI**
-  - Mobile-friendly design with Tailwind CSS (or your chosen framework).
+  - Mobile-friendly design with Tailwind CSS.
   - Optimized for desktop, tablet, and mobile screens.
 
 - **Notifications**
